@@ -2,10 +2,10 @@ package edu.mit.securemessaging;
 
 import java.util.List;
 
-public class SecureMessagingBackend {
+public class Backend {
     String username;
     String key;
-    public SecureMessagingBackend() {
+    public Backend() {
         
     }
     
