@@ -82,4 +82,20 @@ public class Backend {
     public void deleteContact(Person person) {
         contacts.remove(person);
     }
+    
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    public String getUsername() {
+        return this.username;
+    }
+    
+    public void setKey(String key) {
+        this.key = key;
+    }
+    
+    public String getKey() {
+        return key;
+    }
 }
