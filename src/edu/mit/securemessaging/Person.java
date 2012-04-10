@@ -1,23 +1,45 @@
 package edu.mit.securemessaging;
 
-import android.graphics.Picture;
+import android.graphics.Bitmap;
+
 
 public class Person {
+    private Bitmap photo;
+    private String key;
+    private String name;
+    private TrustLevel trustLevel;
+    
+    public Person(String name, String key, TrustLevel trust, Bitmap photo) {
+        this.name = name;
+        this.key = key;
+        this.trustLevel = trust;
+        this.photo = photo;
+    }
+    
+    public Person(String name, String key) {
+        this(name, key, TrustLevel.UNKNOWN, null);
+    }
+    
+    public Person(String name, String key, TrustLevel trust) {
+        this(name, key, trust, null);
+    }
     
     /**
      * Set this person's photo.
      * @param photo
      */
-    public void setPhoto(Picture photo) {
-        throw new UnsupportedOperationException();
+    public void setPhoto(Bitmap photo) {
+        // TODO: Get external resource.
+        this.photo = photo;
     }
     
     /**
-     * Get this persons photo. Returns a filler photo if none is set.
+     * Get this persons photo. Returns null if no photo is set.
      * @return
      */
-    public Picture getPhoto() {
-        throw new UnsupportedOperationException();
+    public Bitmap getPhoto() {
+        // TODO: Set external resource.
+        return photo;
     }
     
     /**
@@ -42,7 +64,8 @@ public class Person {
      * @param name
      */
     public void setName(String name) {
-        throw new UnsupportedOperationException();
+        // TODO: Set external resource.
+        this.name = name;
     }
     
     /**
@@ -50,7 +73,8 @@ public class Person {
      * @return
      */
     public String getName() {
-        throw new UnsupportedOperationException();
+        // TODO: Get external resource.
+        return name;
     }
     
     /**
@@ -58,7 +82,8 @@ public class Person {
      * @return
      */
     public TrustLevel getTrustLevel() {
-        throw new UnsupportedOperationException();
+        // TODO: Get external resource.
+        return trustLevel;
     }
     
     /**
@@ -66,6 +91,7 @@ public class Person {
      * @param trust
      */
     public void setTrustLevel(TrustLevel trust) {
-        throw new UnsupportedOperationException();
+        // TODO: Set external resource.
+        this.trustLevel = trust;
     }
 }

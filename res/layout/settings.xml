@@ -3,12 +3,6 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.13"
-        android:text="Settings" />
+    <include android:id="@+id/settingsTitle" layout="@layout/title" />
 
 </LinearLayout>

@@ -2,5 +2,10 @@
 <resources>
     <string name="app_name">Secure Messaging</string>
     <string name="contacts_title">Contacts</string>
+    <string name="add_contact">Add</string>
+    <string name="verified">verified</string>
+    <string name="unverified">unverified</string>
+    <color name="verified_color">#477814</color>
+    <color name="unverified_color">#E49D24</color>
 
 </resources>

@@ -1,32 +1,30 @@
 package edu.mit.securemessaging;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Backend {
+    private static Backend INSTANCE = null;
     String username;
     String key;
-    public Backend() {
-        
+    
+    // TODO: Make this get data from backend
+    List<Person> contacts = new ArrayList<Person>();
+    
+    protected Backend() {
+        // Set fake key and username
+        username = "John Doe 42";
+        key = "Fake key";
+        addContact(new Person("Other Person", "fake key"));
+        addContact(new Person("Other Person 2", "fake key", TrustLevel.VERIFIED));
     }
     
-    /**
-     * Get a list of at most number conversations starting at offset.
-     * @param offset - the starting offset
-     * @param number - the maximum number of conversations to get
-     * @return list of conversations
-     */
-    public List<Conversation> getConversations(int offset, int number) {
-        // TODO
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * Get a list of conversations starting at offset.
-     * @param offset - the starting offset
-     * @return list of conversations
-     */
-    public List<Conversation> getConversations(int offset) {
-        return getConversations(offset, -1);
+    public static Backend getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Backend();
+        }
+        return INSTANCE;
     }
     
     /**
@@ -34,7 +32,8 @@ public class Backend {
      * @return list of conversations
      */
     public List<Conversation> getConversations() {
-        return getConversations(0, -1);
+        // TODO
+        throw new UnsupportedOperationException();
     }
    
     /**
@@ -57,23 +56,11 @@ public class Backend {
     }
     
     /**
-     * Get a list of at most number contacts starting at offset.
-     * @param offset
-     * @param number
-     * @return
-     */
-    public List<Person> getContacts(int offset, int number) {
-        // TODO
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
      * Get a list of contacts.
      * @return
      */
     public List<Person> getContacts() {
-        // TODO
-        throw new UnsupportedOperationException();
+        return Collections.unmodifiableList(contacts);
     }
     
     /**
@@ -81,8 +68,11 @@ public class Backend {
      * @param person
      */
     public void addContact(Person person) {
-        // TODO
-        throw new UnsupportedOperationException();
+        // XXX: Do this or throw error?
+        if (person.getTrustLevel() == TrustLevel.UNKNOWN) {
+            person.setTrustLevel(TrustLevel.KNOWN);
+        }
+        contacts.add(person);
     }
     
     /**
@@ -90,7 +80,6 @@ public class Backend {
      * @param person
      */
     public void deleteContact(Person person) {
-        // TODO
-        throw new UnsupportedOperationException();
+        contacts.remove(person);
     }
 }
