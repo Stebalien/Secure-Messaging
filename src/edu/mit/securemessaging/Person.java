@@ -7,21 +7,23 @@ public class Person {
     private Bitmap photo;
     private String key;
     private String name;
+    private String username;
     private TrustLevel trustLevel;
     
-    public Person(String name, String key, TrustLevel trust, Bitmap photo) {
+    public Person(String name, String username, String key, TrustLevel trust, Bitmap photo) {
         this.name = name;
+        this.username = username;
         this.key = key;
         this.trustLevel = trust;
         this.photo = photo;
     }
     
-    public Person(String name, String key) {
-        this(name, key, TrustLevel.UNKNOWN, null);
+    public Person(String name, String username, String key) {
+        this(name, username, key, TrustLevel.UNKNOWN, null);
     }
     
-    public Person(String name, String key, TrustLevel trust) {
-        this(name, key, trust, null);
+    public Person(String name, String username, String key, TrustLevel trust) {
+        this(name, username, key, trust, null);
     }
     
     /**
@@ -93,5 +95,13 @@ public class Person {
     public void setTrustLevel(TrustLevel trust) {
         // TODO: Set external resource.
         this.trustLevel = trust;
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+    
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

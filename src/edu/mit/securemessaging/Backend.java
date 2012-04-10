@@ -7,6 +7,7 @@ import java.util.List;
 public class Backend {
     private static Backend INSTANCE = null;
     String username;
+    String name;
     String key;
     
     // TODO: Make this get data from backend
@@ -14,10 +15,14 @@ public class Backend {
     
     protected Backend() {
         // Set fake key and username
-        username = "John Doe 42";
-        key = "Fake key";
-        addContact(new Person("Other Person", "fake key"));
-        addContact(new Person("Other Person 2", "fake key", TrustLevel.VERIFIED));
+        setUsername("john_doe_42");
+        setName("John Doe 42");
+        setKey("Fake Key");
+        addContact(new Person("Rob Miller", "rmiller", "fake key"));
+        addContact(new Person("Stephen Jones", "", "sjones", TrustLevel.VERIFIED));
+        addContact(new Person("Steven Allen", "steb", "fake key", TrustLevel.VERIFIED));
+        addContact(new Person("Neel Sheth", "ndsheth", "fake key", TrustLevel.VERIFIED));
+        addContact(new Person("Kenneth Schumacher", "drken", "fake key", TrustLevel.VERIFIED));
     }
     
     public static Backend getInstance() {
@@ -89,6 +94,14 @@ public class Backend {
     
     public String getUsername() {
         return this.username;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        return this.name;
     }
     
     public void setKey(String key) {
