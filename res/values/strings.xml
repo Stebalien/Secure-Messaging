@@ -10,4 +10,6 @@
     <color name="verified_color">#477814</color>
     <color name="unverified_color">#E49D24</color>
 
+    <string name="active_username">John Doe</string>
+    <string name="active_usercode">ak41&#8211;vmak&#8211;krs2&#8211;6xmm&#8211;gmla</string>
 </resources>

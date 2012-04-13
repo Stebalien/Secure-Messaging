@@ -3,6 +3,33 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    <include android:id="@+id/identityTitle" layout="@layout/title" />
 
+    <include
+        android:id="@+id/identityTitle"
+        layout="@layout/title" />
+
+    <ImageView
+        android:id="@+id/exampleQrCode"
+        android:layout_width="276dp"
+        android:layout_height="272dp"
+        android:layout_gravity="center"
+        android:scaleType="fitStart"
+        android:src="@drawable/qrcode" />
+    	
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="290dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/active_username"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/active_usercode"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+		
 </LinearLayout>

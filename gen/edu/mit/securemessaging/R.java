@@ -35,21 +35,27 @@ public final class R {
         public static final int lock_black=0x7f020011;
         public static final int lock_green=0x7f020012;
         public static final int lock_red=0x7f020013;
-        public static final int single_chat_black=0x7f020014;
-        public static final int single_chat_green=0x7f020015;
-        public static final int single_chat_red=0x7f020016;
+        public static final int qrcode=0x7f020014;
+        public static final int single_chat_black=0x7f020015;
+        public static final int single_chat_green=0x7f020016;
+        public static final int single_chat_red=0x7f020017;
     }
     public static final class id {
-        public static final int btnHeaderLeft=0x7f060009;
-        public static final int btnHeaderRight=0x7f06000b;
+        public static final int btnHeaderLeft=0x7f06000e;
+        public static final int btnHeaderRight=0x7f060010;
         public static final int contactList=0x7f060005;
         public static final int contactsTitle=0x7f060004;
+        public static final int exampleQrCode=0x7f060007;
         public static final int identityTitle=0x7f060006;
-        public static final int inboxTitle=0x7f060007;
-        public static final int labelHeader=0x7f06000a;
+        public static final int inboxTitle=0x7f06000a;
+        public static final int labelHeader=0x7f06000f;
         public static final int name=0x7f060001;
         public static final int photo=0x7f060000;
-        public static final int settingsTitle=0x7f060008;
+        public static final int settingCheckbox01=0x7f06000c;
+        public static final int settingCheckbox02=0x7f06000d;
+        public static final int settingsTitle=0x7f06000b;
+        public static final int textView1=0x7f060008;
+        public static final int textView2=0x7f060009;
         public static final int username=0x7f060002;
         public static final int verified_text=0x7f060003;
     }
@@ -63,6 +69,8 @@ public final class R {
         public static final int title=0x7f030006;
     }
     public static final class string {
+        public static final int active_usercode=0x7f040008;
+        public static final int active_username=0x7f040007;
         public static final int add_contact=0x7f040004;
         public static final int app_name=0x7f040000;
         public static final int contacts_title=0x7f040001;

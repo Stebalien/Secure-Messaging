@@ -5,4 +5,16 @@
     android:orientation="vertical" >
     <include android:id="@+id/settingsTitle" layout="@layout/title" />
 
+    <CheckBox
+        android:id="@+id/settingCheckbox01"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Random Setting 1" />
+
+    <CheckBox
+        android:id="@+id/settingCheckbox02"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Random Setting 2" />
+
 </LinearLayout>
