@@ -17,18 +17,20 @@
         android:src="@drawable/qrcode" />
     	
     <TextView
-        android:id="@+id/textView1"
-        android:layout_width="290dp"
+        android:id="@+id/myName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:gravity="center"
         android:text="@string/active_username"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="270dp"
+        android:id="@+id/myKey"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:gravity="center"
         android:text="@string/active_usercode"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 		

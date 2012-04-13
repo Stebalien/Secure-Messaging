@@ -49,13 +49,13 @@ public final class R {
         public static final int identityTitle=0x7f060006;
         public static final int inboxTitle=0x7f06000a;
         public static final int labelHeader=0x7f06000f;
+        public static final int myKey=0x7f060009;
+        public static final int myName=0x7f060008;
         public static final int name=0x7f060001;
         public static final int photo=0x7f060000;
         public static final int settingCheckbox01=0x7f06000c;
         public static final int settingCheckbox02=0x7f06000d;
         public static final int settingsTitle=0x7f06000b;
-        public static final int textView1=0x7f060008;
-        public static final int textView2=0x7f060009;
         public static final int username=0x7f060002;
         public static final int verified_text=0x7f060003;
     }
