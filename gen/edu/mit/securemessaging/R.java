@@ -63,10 +63,12 @@ public final class R {
         public static final int title=0x7f030006;
     }
     public static final class string {
-        public static final int add_contact=0x7f040002;
+        public static final int add_contact=0x7f040004;
         public static final int app_name=0x7f040000;
         public static final int contacts_title=0x7f040001;
-        public static final int unverified=0x7f040004;
-        public static final int verified=0x7f040003;
+        public static final int identity_title=0x7f040003;
+        public static final int settings_title=0x7f040002;
+        public static final int unverified=0x7f040006;
+        public static final int verified=0x7f040005;
     }
 }
