@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="#555555"
     android:padding="5dp">
 
-    <Button
-        android:id="@+id/btnHeaderLeft"
-        style="?android:attr/buttonStyleSmall"
+    <ImageView
+        android:id="@+id/imgHeaderIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:visibility="invisible"
-        android:text="Button Left" />
+        android:layout_weight="0"
+        android:visibility="gone"
+        android:src="@drawable/single_chat_grey_32" />
 
     <TextView
         android:id="@+id/labelHeader"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center|center_vertical"
-        android:layout_gravity="center|center_vertical"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
         android:layout_weight="1.0"
         android:text="Title"
         android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -33,4 +32,4 @@
         android:visibility="invisible"
         android:text="Button Right" />
 
-</RelativeLayout>
+</LinearLayout>

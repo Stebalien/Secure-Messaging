@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical">
-    
-    <include android:id="@+id/inboxTitle" layout="@layout/title" />
+    android:orientation="vertical" >
+    <include android:id="@+id/conversationsTitle" layout="@layout/title" />
+
     <ListView
         android:id="@+id/conversationList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </ListView>
-    
+
 </LinearLayout>

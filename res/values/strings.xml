@@ -12,4 +12,18 @@
 
     <string name="active_username">John Doe</string>
     <string name="active_usercode">ak41&#8211;vmak&#8211;krs2&#8211;6xmm&#8211;gmla</string>
+    <string name="unknown">unknown</string>
+    <color name="unknown_color">#ff0000</color>
+    <string name="message_placeholder">Type your message here.</string>
+    <string name="send_text">Send</string>
+    <string name="back_text">Back</string>
+    <string name="contact_picker_title">Pick A Contact</string>
+    <string name="new_conversation">New</string>
+    <string name="conversations_title">Inbox</string>
+    <string name="add_contact_title">Add Contact</string>
+    <string name="verified_checkbox">I know this user</string>
+    <string name="name_hint">Full Name</string>
+    <string name="username_hint">Username</string>
+    <string name="save_text">Save</string>
+    <string name="edit_contact_title">Edit Contact</string>
 </resources>

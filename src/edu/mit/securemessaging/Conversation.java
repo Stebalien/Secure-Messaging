@@ -1,35 +1,56 @@
 package edu.mit.securemessaging;
 
+import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EventListener;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Conversation {
-    /**
-     * Get the number messages starting at start.
-     * @param start - the offset
-     * @param number - the number of messages to get (at most).
-     * @return the messages
-     */
-    public List<Message> getMessages(int start, int number) {
-        throw new UnsupportedOperationException();
+    private final String id;
+    private Date timestamp;
+    private final static Backend backend = Backend.getInstance();
+    
+    private static final Random RAND = new Random();
+    private Status status = Status.READ;
+    private TrustLevel trustLevel = TrustLevel.VERIFIED;
+    
+    private List<Message> messageList;
+    private List<Person> memberList;
+    private final Set<ConversationListener> messageListListeners = new CopyOnWriteArraySet<ConversationListener>();
+    private final Timer fake_reply_timer = new Timer();
+    
+    public Conversation() {
+        id = UUID.randomUUID().toString();
+        messageList = new ArrayList<Message>();
+        memberList = new ArrayList<Person>();
+        this.timestamp = new Date();
     }
     
-    /**
-     * Get the messages in this conversation starting at start.
-     * @param start - the start offset
-     * @return the messages
-     */
-    public List<Message> getMessages(int start) {
-        return getMessages(start, -1);
+    public Conversation(String id, List<Message> messages, List<Person> members, Date timestamp) {
+        this.id = id;
+        this.timestamp = timestamp;
+        messageList = new ArrayList<Message>(messages);
+        memberList = new ArrayList<Person>(members);
     }
     
-    /**
-     * Get the messages in this conversation.
-     * @return the messages.
-     */
     public List<Message> getMessages() {
-        return getMessages(0, -1);
+        return Collections.unmodifiableList(messageList);
     }
     
+    public void updateTrustLevel() {
+        for (Person p : memberList) {
+            TrustLevel memberTrust = p.getTrustLevel();
+            if(memberTrust.isLowerThan(trustLevel))
+                trustLevel=memberTrust;
+        }
+    }
     /**
      * Remove messages from the conversation.
      * @param messages - the messages to remove.
@@ -44,7 +65,30 @@ public class Conversation {
      * @return the message that was sent.
      */
     public Message sendMessage(String contents) {
-        throw new UnsupportedOperationException();
+        //TODO: send message
+        Message m = new Message(this, backend.getMe(), contents);
+        addMessage(m);
+        // Generate response
+        final Conversation self = this;
+        List<Person> members = getMembers();
+        if (!members.isEmpty()) {
+            final Message reply = new Message(self, members.get(RAND.nextInt(members.size())), "That's Nice.");
+            fake_reply_timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    addMessage(reply);
+                }
+            }, 2000);
+        }
+        
+        return m;
+    }
+    
+    protected void addMessage(Message m) {
+        messageList.add(m);
+        status = Status.UNREAD;
+        timestamp = m.getTimestamp();
+        fireConversationUpdated();
     }
     
     /**
@@ -59,7 +103,7 @@ public class Conversation {
      * @return the conversation ID
      */
     public String getID() {
-        throw new UnsupportedOperationException();
+        return id;
     }
     
     /**
@@ -67,7 +111,14 @@ public class Conversation {
      * @param person - the person to add
      */
     public void addMember(Person person) {
-        throw new UnsupportedOperationException();
+        if (memberList.contains(person)) {
+            return;
+        }
+        memberList.add(person);
+        if (person.getTrustLevel().isLowerThan(getTrustLevel())) {
+            this.trustLevel = person.getTrustLevel();
+        }
+        fireConversationUpdated();
     }
     
     /**
@@ -83,7 +134,9 @@ public class Conversation {
      * @return - the members of this conversation.
      */
     public List<Person> getMembers() {
-        throw new UnsupportedOperationException();
+        // Should have a more robust way of setting the status to read.
+        status = Status.READ;
+        return Collections.unmodifiableList(memberList);
     }
     
     /**
@@ -91,7 +144,7 @@ public class Conversation {
      * @return the trust level
      */
     public TrustLevel getTrustLevel() {
-        throw new UnsupportedOperationException();
+        return trustLevel;
     }
     
     /**
@@ -108,6 +161,42 @@ public class Conversation {
      * @return
      */
     public Status getStatus() {
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
+        return status;
+    }
+    
+    protected void fireConversationUpdated() {
+        for (ConversationListener l : messageListListeners) {
+            l.onConversationUpdated();
+        }
+    }
+    
+    public void addConversationListener(ConversationListener listener) {
+        messageListListeners.add(listener);
+    }
+    
+    public void removeConversationListener(ConversationListener listener) {
+        messageListListeners.remove(listener);
+    }
+    
+    public static interface ConversationListener extends EventListener {
+        public void onConversationUpdated();
+    }
+    
+    /**
+     * Gets the most recent message's timestamp
+     * @return
+     */
+    public Date getTimestamp() {
+        //returns the timestamp of the most recent message
+        return timestamp;
+    }
+    
+    public Message getLatestMessage() {
+        if (messageList.size() == 0) {
+            return null;
+        } else {
+            return messageList.get(messageList.size()-1);
+        }
     }
 }

@@ -2,25 +2,25 @@ package edu.mit.securemessaging.widgets;
 
 import java.util.List;
 
+import edu.mit.securemessaging.Message;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ContactAdapter extends ArrayAdapter<Person> {
+public class MessageAdapter extends ArrayAdapter<Message> {
 
     final int viewResourceId;
     final Resources res;
 
-    public ContactAdapter(Context context, int viewResourceId, List<Person> contacts) {
-        super(context, viewResourceId, contacts);
+    public MessageAdapter(Context context, int viewResourceId, List<Message> messages) {
+        super(context, viewResourceId, messages);
         this.viewResourceId = viewResourceId;
         res = context.getResources();
         
@@ -29,13 +29,13 @@ public class ContactAdapter extends ArrayAdapter<Person> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        ContactMapping map;
+        MessageMapping map;
         if (row == null) {
             row = ((Activity)this.getContext()).getLayoutInflater().inflate(viewResourceId, parent, false);
-            map = new ContactMapping(row);
+            map = new MessageMapping(row);
             row.setTag(map);
         } else {
-            map = (ContactMapping) row.getTag();
+            map = (MessageMapping) row.getTag();
         }
         
         map.update(this.getItem(position));
@@ -43,40 +43,49 @@ public class ContactAdapter extends ArrayAdapter<Person> {
         return row;
     }
     
-    private class ContactMapping {
-        ImageView photo;
+    private class MessageMapping {
         TextView name;
         TextView verified_text;
-        TextView username;
+        TextView message_text;
+        ImageView lock_icon;
+        View row;
+        //TextView username;
         
-        public ContactMapping(View row) {
-            photo = (ImageView)row.findViewById(R.id.photo);
+        public MessageMapping(View row) {
+            this.row = row;
             name = (TextView)row.findViewById(R.id.name);
-            username = (TextView)row.findViewById(R.id.username);
+            //username = (TextView)row.findViewById(R.id.username);
             verified_text = (TextView)row.findViewById(R.id.verified_text);
+            message_text = (TextView)row.findViewById(R.id.message_text);
+            lock_icon = (ImageView)row.findViewById(R.id.lock_icon);
         }
         
-        public void update(Person person) {
-            this.name.setText(person.getName());
-            this.username.setText(person.getUsername());
+        public void update(Message message) {
+            Person sender = message.getSender();
+            this.name.setText(sender.getName());
+            this.message_text.setText(message.getContents());
             
-            switch (person.getTrustLevel()) {
+            switch (sender.getTrustLevel()) {
                 case VERIFIED:
                     this.verified_text.setText(R.string.verified);
+                    this.lock_icon.setImageResource(R.drawable.ic_lock_verified);
                     this.verified_text.setTextColor(res.getColor(R.color.verified_color));
+                    this.row.setBackgroundResource(R.drawable.bg_msg_verified);
                     break;
                 case KNOWN:
                     this.verified_text.setText(R.string.unverified);
+                    this.lock_icon.setImageResource(R.drawable.ic_lock_unverified);
                     this.verified_text.setTextColor(res.getColor(R.color.unverified_color));
+                    this.row.setBackgroundResource(R.drawable.bg_msg_known);
                     break;
                 case UNKNOWN:
-                    throw new RuntimeException("Contacts is unknown (invalid)");
+                    this.verified_text.setText(R.string.unknown);
+                    this.lock_icon.setImageResource(R.drawable.ic_lock_unknown);
+                    this.verified_text.setTextColor(res.getColor(R.color.unknown_color));
+                    this.row.setBackgroundResource(R.drawable.bg_msg_unknown);
+                    break;
                 default:
                     throw new RuntimeException("Invalid trust level in person");
-            }
-            Bitmap bitmap = person.getPhoto();
-            if (bitmap != null) {
-                this.photo.setImageBitmap(bitmap);
             }
         }
     }

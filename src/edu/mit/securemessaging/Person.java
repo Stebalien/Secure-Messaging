@@ -1,16 +1,21 @@
 package edu.mit.securemessaging;
 
+import java.util.EventListener;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 import android.graphics.Bitmap;
 
 
 public class Person {
     private Bitmap photo;
-    private String key;
+    private Key key;
     private String name;
     private String username;
     private TrustLevel trustLevel;
+    private Set<PersonListener> personListeners = new CopyOnWriteArraySet<PersonListener>();
     
-    public Person(String name, String username, String key, TrustLevel trust, Bitmap photo) {
+    public Person(String name, String username, Key key, TrustLevel trust, Bitmap photo) {
         this.name = name;
         this.username = username;
         this.key = key;
@@ -18,11 +23,11 @@ public class Person {
         this.photo = photo;
     }
     
-    public Person(String name, String username, String key) {
+    public Person(String name, String username, Key key) {
         this(name, username, key, TrustLevel.UNKNOWN, null);
     }
     
-    public Person(String name, String username, String key, TrustLevel trust) {
+    public Person(String name, String username, Key key, TrustLevel trust) {
         this(name, username, key, trust, null);
     }
     
@@ -48,16 +53,16 @@ public class Person {
      * Set this person's encryption key.
      * @param key
      */
-    public void setKey(String key) {
-        throw new UnsupportedOperationException();
+    public void setKey(Key key) {
+        this.key = key;
     }
     
     /**
      * Get this person's encryption key
      * @return
      */
-    public String getKey() {
-        throw new UnsupportedOperationException();
+    public Key getKey() {
+        return key;
     }
     
     
@@ -101,7 +106,30 @@ public class Person {
         return username;
     }
     
+    public String getID() {
+        return username;
+    }
+    
     public void setUsername(String username) {
         this.username = username;
+    }
+    
+    protected void firePersonUpdated() {
+        for (PersonListener l : personListeners) {
+            l.onPersonUpdated();
+        }
+    }
+    
+    public void addConversationListener(PersonListener listener) {
+        personListeners.add(listener);
+    }
+    
+    public void removeConversationListener(PersonListener listener) {
+        personListeners.remove(listener);
+    }
+    
+    // Unused for now.
+    public static interface PersonListener extends EventListener {
+        public void onPersonUpdated();
     }
 }

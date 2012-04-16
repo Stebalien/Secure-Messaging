@@ -14,6 +14,7 @@
         android:layout_height="272dp"
         android:layout_gravity="center"
         android:scaleType="fitStart"
+        android:padding="5dp"
         android:src="@drawable/qrcode" />
     	
     <TextView
@@ -22,11 +23,20 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:text="@string/active_username"
+        android:text="User"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/myKey"
+        android:id="@+id/myFingerprint1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:text="@string/active_usercode"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <TextView
+        android:id="@+id/myFingerprint2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
