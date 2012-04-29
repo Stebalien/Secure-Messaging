@@ -2,12 +2,14 @@ package edu.mit.securemessaging;
 
 import java.util.EventListener;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import android.graphics.Bitmap;
 
 
 public class Person {
+    private final String id;
     private Bitmap photo;
     private Key key;
     private String name;
@@ -15,7 +17,8 @@ public class Person {
     private TrustLevel trustLevel;
     private Set<PersonListener> personListeners = new CopyOnWriteArraySet<PersonListener>();
     
-    public Person(String name, String username, Key key, TrustLevel trust, Bitmap photo) {
+    public Person(String id, String name, String username, Key key, TrustLevel trust, Bitmap photo) {
+        this.id = id;
         this.name = name;
         this.username = username;
         this.key = key;
@@ -24,11 +27,11 @@ public class Person {
     }
     
     public Person(String name, String username, Key key) {
-        this(name, username, key, TrustLevel.UNKNOWN, null);
+        this(UUID.randomUUID().toString(), name, username, key, TrustLevel.UNKNOWN, null);
     }
     
     public Person(String name, String username, Key key, TrustLevel trust) {
-        this(name, username, key, trust, null);
+        this(UUID.randomUUID().toString(), name, username, key, trust, null);
     }
     
     /**
@@ -107,7 +110,7 @@ public class Person {
     }
     
     public String getID() {
-        return username;
+        return id;
     }
     
     public void setUsername(String username) {

@@ -40,14 +40,11 @@ public class ContactsActivity extends Activity {
         contactList = (ListView)findViewById(R.id.contactList);
         contactList.setAdapter(new ContactAdapter(this, R.layout.contact, backend.getContacts()));
         
-        /*
         contactList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(view.getContext(), EditContactActivity.class);
-                startActivityForResult(intent, 0); // Should be const later TODO
+                editContact((Person)parent.getItemAtPosition(position));
             }
         });
-        */
         
         // Show right button.
         btnAddContact = (Button)findViewById(R.id.btnHeaderRight);
@@ -99,7 +96,7 @@ public class ContactsActivity extends Activity {
                         Toast.makeText(getApplicationContext(), "You have scanned someone's barcode.", Toast.LENGTH_LONG).show();
                         break;
                     case 1:
-                        Toast.makeText(getApplicationContext(), "You have manually added a contact.", Toast.LENGTH_LONG).show();
+                        addContact();
                         break;
                 }
             }
@@ -109,7 +106,12 @@ public class ContactsActivity extends Activity {
     
     public void editContact(Person contact) {
         Intent intent = new Intent(this, EditContactActivity.class);
-        intent.putExtra("id", backend.newConversation().getID());
+        intent.putExtra("id", contact.getID());
+        startActivityForResult(intent, 0); // Should be const later TODO
+    }
+    
+    public void addContact() {
+        Intent intent = new Intent(this, EditContactActivity.class);
         startActivityForResult(intent, 0); // Should be const later TODO
     }
     
