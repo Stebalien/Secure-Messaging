@@ -37,6 +37,7 @@ public final class Common {
     
     public static int getConversationIcon(Conversation c) {
         switch (c.getTrustLevel()) {
+            case ME:
             case VERIFIED:
                 //set background color to green
             	if(c.isGroupConversation())//set icon to group conversation, green

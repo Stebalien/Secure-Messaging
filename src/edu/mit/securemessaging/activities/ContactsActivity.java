@@ -1,9 +1,15 @@
 package edu.mit.securemessaging.activities;
 
+import java.sql.SQLException;
+
+import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
+
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Backend.ContactsListener;
+import edu.mit.securemessaging.DatabaseHelper;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
+import edu.mit.securemessaging.TrustLevel;
 import edu.mit.securemessaging.widgets.ContactAdapter;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,7 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ContactsActivity extends Activity {
+public class ContactsActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     protected static enum ContactDialog {
         ADD_CONTACT, DELETE_CONTACT, DELETE_CONTACT_CONFIRM, DELETE_CONTACT_CONFIRM_WIPE;
         public static ContactDialog valueOf(int ordinal) {
@@ -31,14 +37,23 @@ public class ContactsActivity extends Activity {
     /** Called when the activity is first created. */
     private ListView contactList;
     private Button btnAddContact;
-    private final static Backend backend = Backend.getInstance();
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contacts);
         Backend backend = Backend.getInstance();
         contactList = (ListView)findViewById(R.id.contactList);
-        contactList.setAdapter(new ContactAdapter(this, R.layout.contact, backend.getContacts()));
+        try {
+            contactList.setAdapter(
+                    new ContactAdapter(this,
+                            R.layout.contact,
+                            getHelper().getPersonDao().queryBuilder().orderBy("name", false).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
+                            getHelper())
+                    );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         
         contactList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

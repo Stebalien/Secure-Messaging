@@ -3,12 +3,37 @@ package edu.mit.securemessaging;
 import java.util.Date;
 import java.util.UUID;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+@DatabaseTable(tableName = "message")
 public class Message {
+    public static final String ID_FIELD = "_id";
+    public static final String CONVERSATION_FIELD = "conversation_id";
+    public static final String SENDER_FIELD = "sender_id";
+    public static final String TIMESTAMP_FIELD = "timestamp";
+    public static final String CONTENTS_FIELD = "contents";
+    private static Backend BACKEND;
+    
+    @DatabaseField(columnName = ID_FIELD, id = true)
     private final String id;
+    
+    @DatabaseField(canBeNull=false, columnName=TIMESTAMP_FIELD)
     private final Date timestamp;
+    
+    @DatabaseField(foreign = true, canBeNull=false, columnName = CONVERSATION_FIELD)
     private final Conversation conversation;
+    
+    @DatabaseField(foreign = true, canBeNull=false, columnName = SENDER_FIELD)
     private final Person sender;
+    
+    @DatabaseField(canBeNull=false, columnName=CONTENTS_FIELD)
     private final String contents;
+    
+    public Message() {
+        // For ORMLite
+        this(null, null, null);
+    }
     
 
     /**
@@ -37,6 +62,7 @@ public class Message {
         this.sender = sender;
         this.contents = contents;
         this.timestamp = timestamp;
+        if (BACKEND == null) BACKEND = Backend.getInstance();
     }   
     
     /**

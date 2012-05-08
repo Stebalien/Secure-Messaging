@@ -26,4 +26,8 @@
     <string name="username_hint">Username</string>
     <string name="save_text">Save</string>
     <string name="edit_contact_title">Edit Contact</string>
+    <color name="error_background">#ff7070</color>
+    <color name="error_foreground">#ff0000</color>
+    <string name="invalid_name">* Invalid Name</string>
+    <string name="conflict_name">* You already have a contact by this name.</string>
 </resources>

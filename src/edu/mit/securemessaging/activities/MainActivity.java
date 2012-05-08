@@ -1,8 +1,6 @@
 package edu.mit.securemessaging.activities;
 
 import edu.mit.securemessaging.R;
-import edu.mit.securemessaging.R.layout;
-import android.app.Activity;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;

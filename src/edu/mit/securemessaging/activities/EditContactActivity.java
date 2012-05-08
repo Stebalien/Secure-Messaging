@@ -1,30 +1,28 @@
 package edu.mit.securemessaging.activities;
 
+import java.sql.SQLException;
+
+import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
+
 import edu.mit.securemessaging.Backend;
-import edu.mit.securemessaging.Key;
+import edu.mit.securemessaging.DatabaseHelper;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
-import edu.mit.securemessaging.widgets.ContactAdapter;
-import android.R.color;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.ListView;
+import android.widget.EditText;
 import android.widget.TextView;
 
-public class EditContactActivity extends Activity {
+public class EditContactActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     /** Called when the activity is first created. */
     private Backend backend = Backend.getInstance();
-    private TextView name;
-    private TextView username;
+    private EditText name;
+    private TextView nameError;
     private CheckBox verified;
     private Person contact;
     @Override
@@ -32,9 +30,9 @@ public class EditContactActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_contact_activity);
         
-        name = ((TextView)findViewById(R.id.txtName));
-        username = ((TextView)findViewById(R.id.txtUsername));
+        name = (EditText)findViewById(R.id.txtName);
         verified = ((CheckBox)findViewById(R.id.chkVerified));
+        nameError = (TextView)findViewById(R.id.lableNameError);
         
         String id = getIntent().getStringExtra("id");
         if (id == null) {
@@ -42,38 +40,42 @@ public class EditContactActivity extends Activity {
             contact = null;
         } else {
             ((TextView)findViewById(R.id.labelHeader)).setText(R.string.edit_contact_title);
-            contact = backend.getContact(id);
+            try {
+                contact = backend.getPerson(id);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             name.setText(contact.getName());
-            username.setText(contact.getUsername());
             verified.setChecked(!contact.getTrustLevel().equals(TrustLevel.UNKNOWN));
         }
         
         ((Button)findViewById(R.id.btnSave)).setOnClickListener(new OnClickListener() {
             public void onClick(View view) {
                 if (name.getText().toString().equals("")) {
-                    name.setBackgroundColor(R.color.unverified_color);
+                    nameError.setText(R.string.invalid_name);
+                    nameError.setVisibility(View.VISIBLE);
                     return;
                 } else {
-                    name.setBackgroundColor(color.background_light);
+                    nameError.setVisibility(View.GONE);
                 }
-                if (username.getText().toString().equals("")) {
-                    username.setBackgroundColor(R.color.unverified_color);
+                
+                TrustLevel t = verified.isChecked() ? TrustLevel.VERIFIED : TrustLevel.KNOWN;
+                String n = name.getText().toString();
+                try {
+                    if (contact == null) {
+                        contact = new Person(n, t);
+                    } else {
+                        contact.setName(n);
+                        contact.setTrustLevel(t);
+                    }
+                    backend.addOrUpdateContact(contact);
+                    nameError.setVisibility(View.GONE);
+                } catch (SQLException e) {
+                    nameError.setText(R.string.conflict_name);
+                    nameError.setVisibility(View.VISIBLE);
                     return;
-                } else {
-                    username.setBackgroundColor(color.background_light);
                 }
-                if (contact == null) {
-                    contact = new Person(
-                            name.getText().toString(),
-                            username.getText().toString(),
-                            new Key()
-                            );
-                    backend.addContact(contact);
-                } else {
-                    contact.setName(name.getText().toString());
-                    contact.setUsername(username.getText().toString());
-                }
-                contact.setTrustLevel(verified.isChecked() ? TrustLevel.VERIFIED : TrustLevel.KNOWN);
+                
                 setResult(Activity.RESULT_OK);
                 finish();
             }

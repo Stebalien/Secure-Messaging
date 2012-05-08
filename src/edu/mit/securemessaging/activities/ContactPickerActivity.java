@@ -1,22 +1,24 @@
 package edu.mit.securemessaging.activities;
 
-import edu.mit.securemessaging.Backend;
+import java.sql.SQLException;
+
+import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
+
+import edu.mit.securemessaging.DatabaseHelper;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
+import edu.mit.securemessaging.TrustLevel;
 import edu.mit.securemessaging.widgets.ContactAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ContactPickerActivity extends Activity {
+public class ContactPickerActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     /** Called when the activity is first created. */
     private ListView contactList;
     @Override
@@ -24,7 +26,16 @@ public class ContactPickerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contact_picker);
         contactList = (ListView)findViewById(R.id.contactList);
-        contactList.setAdapter(new ContactAdapter(this, R.layout.contact, Backend.getInstance().getContacts()));
+        try {
+            contactList.setAdapter(
+                    new ContactAdapter(this,
+                            R.layout.contact,
+                            getHelper().getPersonDao().queryBuilder().orderBy("name", false).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
+                            getHelper())
+                    );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         
         contactList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

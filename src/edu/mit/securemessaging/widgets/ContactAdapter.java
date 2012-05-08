@@ -1,64 +1,37 @@
 package edu.mit.securemessaging.widgets;
 
-import java.util.List;
+import java.sql.SQLException;
+
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
+import com.j256.ormlite.stmt.PreparedQuery;
 
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ContactAdapter extends ArrayAdapter<Person> {
+public class ContactAdapter extends SimpleQueryAdapter<Person> {
 
     final int viewResourceId;
     final Resources res;
 
-    public ContactAdapter(Context context, int viewResourceId, List<Person> contacts) {
-        super(context, viewResourceId, contacts);
+    public ContactAdapter(Activity context, int viewResourceId, PreparedQuery<Person> q, OrmLiteSqliteOpenHelper dbh) throws SQLException {
+        super(context, viewResourceId, Person.class, q, dbh, ContactMapping.class);
         this.viewResourceId = viewResourceId;
         res = context.getResources();
-        
     }
     
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View row = convertView;
-        ContactMapping map;
-        if (row == null) {
-            row = ((Activity)this.getContext()).getLayoutInflater().inflate(viewResourceId, parent, false);
-            map = new ContactMapping(row);
-            row.setTag(map);
-        } else {
-            map = (ContactMapping) row.getTag();
-        }
-        
-        map.update(this.getItem(position));
-        
-        return row;
-    }
-    
-    private class ContactMapping {
+    private class ContactMapping extends Mapper{
         ImageView photo;
         TextView name;
         TextView verified_text;
-        TextView username;
-        
-        public ContactMapping(View row) {
-            photo = (ImageView)row.findViewById(R.id.photo);
-            name = (TextView)row.findViewById(R.id.name);
-            username = (TextView)row.findViewById(R.id.username);
-            verified_text = (TextView)row.findViewById(R.id.verified_text);
-        }
         
         public void update(Person person) {
             this.name.setText(person.getName());
-            this.username.setText(person.getUsername());
             
             switch (person.getTrustLevel()) {
                 case VERIFIED:
@@ -71,6 +44,8 @@ public class ContactAdapter extends ArrayAdapter<Person> {
                     break;
                 case UNKNOWN:
                     throw new RuntimeException("Contacts is unknown (invalid)");
+                case ME:
+                    throw new RuntimeException("I can't be in my own contacts.");
                 default:
                     throw new RuntimeException("Invalid trust level in person");
             }
@@ -78,6 +53,13 @@ public class ContactAdapter extends ArrayAdapter<Person> {
             if (bitmap != null) {
                 this.photo.setImageBitmap(bitmap);
             }
+        }
+
+        @Override
+        public void setView(View row) {
+            photo = (ImageView)row.findViewById(R.id.photo);
+            name = (TextView)row.findViewById(R.id.name);
+            verified_text = (TextView)row.findViewById(R.id.verified_text);
         }
     }
 }

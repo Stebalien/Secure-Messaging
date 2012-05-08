@@ -1,15 +1,15 @@
 package edu.mit.securemessaging.activities;
 
-import java.util.List;
+import java.sql.SQLException;
+
+import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Common;
 import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.Conversation.ConversationListener;
-import edu.mit.securemessaging.Message;
-import edu.mit.securemessaging.Person;
+import edu.mit.securemessaging.DatabaseHelper;
 import edu.mit.securemessaging.R;
-import edu.mit.securemessaging.widgets.ContactAdapter;
 import edu.mit.securemessaging.widgets.MessageAdapter;
 import android.app.Activity;
 import android.content.Intent;
@@ -23,7 +23,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ConversationActivity extends Activity {
+public class ConversationActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     private final Backend backend = Backend.getInstance();
     private static enum Request {
         ADD_CONTACT;
@@ -44,7 +44,16 @@ public class ConversationActivity extends Activity {
         setContentView(R.layout.conversation_activity);
         conversation = backend.getConversation(getIntent().getStringExtra("id"));
         listMessages = (ListView)findViewById(R.id.messageList);
-        listMessages.setAdapter(new MessageAdapter(this, R.layout.message, conversation.getMessages()));
+        try {
+            listMessages.setAdapter(
+                    new MessageAdapter(this,
+                            R.layout.message,
+                            getHelper().getMessageDao().queryBuilder().orderBy("timestamp", true).where().eq("conversation_id", conversation).prepare(),
+                            getHelper())
+                    );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         listMessages.setItemsCanFocus(false);
         
         ((TextView)findViewById(R.id.labelHeader)).setText("Placeholder conversation text");
@@ -72,7 +81,11 @@ public class ConversationActivity extends Activity {
         Button btnSend = (Button)findViewById(R.id.btnSend);
         btnSend.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                conversation.sendMessage(txtMessage.getText().toString());
+                try {
+                    conversation.sendMessage(txtMessage.getText().toString());
+                } catch (SQLException e) {
+                    new RuntimeException(e);
+                }
                 txtMessage.setText("");
             }
         });
@@ -100,7 +113,11 @@ public class ConversationActivity extends Activity {
         }
         switch (Request.valueOf(request)) {
             case ADD_CONTACT:
-                conversation.addMember(backend.getContact(data.getStringExtra("id")));
+                try {
+                    conversation.addMember(backend.getPerson(data.getStringExtra("id")));
+                } catch (SQLException e) {
+                    new RuntimeException(e);
+                }
                 break;
         }
         

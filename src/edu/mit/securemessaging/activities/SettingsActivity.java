@@ -1,7 +1,6 @@
 package edu.mit.securemessaging.activities;
 
 import edu.mit.securemessaging.R;
-import edu.mit.securemessaging.R.layout;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;

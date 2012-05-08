@@ -4,7 +4,6 @@ import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 
-import edu.mit.securemessaging.R.layout;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -24,7 +23,7 @@ public class IdentityActivity extends Activity {
         labelName = (TextView)findViewById(R.id.myName);
         labelName.setText(me.getName());
         
-        String fingerprint = me.getKey().getFingerprint();
+        String fingerprint = me.getID();
         int half = fingerprint.length()/2;
         
         labelFingerprint1 = (TextView)findViewById(R.id.myFingerprint1);
