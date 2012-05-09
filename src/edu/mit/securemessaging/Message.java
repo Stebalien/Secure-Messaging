@@ -13,7 +13,6 @@ public class Message {
     public static final String SENDER_FIELD = "sender_id";
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String CONTENTS_FIELD = "contents";
-    private static Backend BACKEND;
     
     @DatabaseField(columnName = ID_FIELD, id = true)
     private final String id;
@@ -62,7 +61,6 @@ public class Message {
         this.sender = sender;
         this.contents = contents;
         this.timestamp = timestamp;
-        if (BACKEND == null) BACKEND = Backend.getInstance();
     }   
     
     /**

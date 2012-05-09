@@ -12,6 +12,14 @@
         android:layout_height="0dip" >
     </ListView>
 
+    <TextView
+        android:id="@+id/conversationEmpty"
+        android:gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1.0"
+        android:text="@string/conversation_empty" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_weight="0"

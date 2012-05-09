@@ -25,27 +25,31 @@ import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "conversation")
 public class Conversation {
-    public static final String ID_FIELD = "_id";
     private static final Random RAND = new Random();
-    
     private static Backend BACKEND;
+    
+    public static final String ID_FIELD = "_id";
+    public static final String TIMESTAMP_FIELD = "timestamp";
+    public static final String STATUS_FIELD = "status";
+    
+    
     
     // Stores the conversation's ID
     @DatabaseField(columnName = ID_FIELD, id = true)
     private final String id;
     
     // Caches the timestamp of the last received message.
-    @DatabaseField
+    @DatabaseField(columnName = TIMESTAMP_FIELD)
     private Date timestamp;
     
     // Caches the read status of the conversation
-    @DatabaseField
+    @DatabaseField(columnName = STATUS_FIELD)
     private Status status = Status.READ;
     
     @ForeignCollectionField(eager = false, orderColumnName = "timestamp")
     private ForeignCollection<Message> messages;
     
-    @ForeignCollectionField(eager = false)
+    @ForeignCollectionField(eager = true)
     private ForeignCollection<Membership> memberships;
     
     private final Set<ConversationListener> conversationListeners = new CopyOnWriteArraySet<ConversationListener>();
@@ -59,21 +63,14 @@ public class Conversation {
     public Conversation() {
         id = UUID.randomUUID().toString();
         this.timestamp = new Date();
-        if (BACKEND == null) {
-            BACKEND = Backend.getInstance();
-        }
-    }
-    
-    public Conversation(String id, List<Message> messages, List<Person> members, Date timestamp) {
-        this.id = id;
-        this.timestamp = timestamp;
+        if (BACKEND == null) BACKEND = Backend.getInstance();
     }
     
     public Collection<Message> getMessages() {
         return Collections.unmodifiableCollection(messages);
     }
     
-    private PreparedQuery<Message> getLastMessageQuery() throws SQLException {
+    public PreparedQuery<Message> getLastMessageQuery() throws SQLException {
         if (lastMessageQuery == null) {
             QueryBuilder<Message, String> qBuilder = BACKEND.getMessageDao().queryBuilder();
             qBuilder.where().eq(Message.CONVERSATION_FIELD, this);
@@ -84,7 +81,7 @@ public class Conversation {
         
     }
     
-    private PreparedQuery<Person> getPersonQuery() throws SQLException {
+    public PreparedQuery<Person> getPersonQuery() throws SQLException {
         if (personQuery == null) {
             QueryBuilder<Membership, String> subQuery = BACKEND.getMembershipDao().queryBuilder();
             subQuery.selectColumns(Membership.PERSON_FIELD);
@@ -98,7 +95,7 @@ public class Conversation {
         return personQuery;
     }
     
-    private PreparedQuery<Person> getTrustLevelQuery() throws SQLException {
+    public PreparedQuery<Person> getTrustLevelQuery() throws SQLException {
         if (trustLevelQuery == null) {
             
             QueryBuilder<Membership, String> subQuery = BACKEND.getMembershipDao().queryBuilder();
@@ -114,7 +111,7 @@ public class Conversation {
         return trustLevelQuery;
     }
     
-    private PreparedQuery<Membership> getMembershipQuery(Person person) throws SQLException {
+    public PreparedQuery<Membership> getMembershipQuery(Person person) throws SQLException {
         if (membershipQuery == null) {
             membershipQuery = BACKEND.getMembershipDao().queryBuilder().where().eq(Membership.CONVERSATION_FIELD, this).eq(Membership.PERSON_FIELD, new SelectArg(person)).prepare();
             return membershipQuery;

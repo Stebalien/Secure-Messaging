@@ -102,4 +102,10 @@ public abstract class SimpleQueryAdapter<T> extends ResourceCursorAdapter {
         public abstract void setView(View row);
         public abstract void update(T obj);
     }
+    
+    public void update() {
+        // Deprecated and slow but compatible and easy.
+        // TODO Maybe fix?
+        getCursor().requery();
+    }
 }

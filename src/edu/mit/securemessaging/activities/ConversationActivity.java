@@ -2,13 +2,12 @@ package edu.mit.securemessaging.activities;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Common;
 import edu.mit.securemessaging.Conversation;
+import edu.mit.securemessaging.Message;
 import edu.mit.securemessaging.Conversation.ConversationListener;
-import edu.mit.securemessaging.DatabaseHelper;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.widgets.MessageAdapter;
 import android.app.Activity;
@@ -16,22 +15,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ConversationActivity extends OrmLiteBaseActivity<DatabaseHelper> {
-    private final Backend backend = Backend.getInstance();
-    private static enum Request {
-        ADD_CONTACT;
-        
-        public static Request valueOf(int ordinal) {
-            return values()[ordinal];
-        }
-    }
+public class ConversationActivity extends Activity {
+    private static Backend BACKEND = null;
+    private static final int ADD_CONTACT = 1;
     
     /** Called when the activity is first created. */
     private ListView listMessages;
@@ -40,21 +32,28 @@ public class ConversationActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     private ImageView icon;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (BACKEND == null) BACKEND = Backend.getInstance();
         super.onCreate(savedInstanceState);
+        
+        final MessageAdapter adapter;
+        
         setContentView(R.layout.conversation_activity);
-        conversation = backend.getConversation(getIntent().getStringExtra("id"));
+        conversation = BACKEND.getConversation(getIntent().getStringExtra("id"));
         listMessages = (ListView)findViewById(R.id.messageList);
+        listMessages.setEmptyView(findViewById(R.id.conversationEmpty));
         try {
-            listMessages.setAdapter(
-                    new MessageAdapter(this,
-                            R.layout.message,
-                            getHelper().getMessageDao().queryBuilder().orderBy("timestamp", true).where().eq("conversation_id", conversation).prepare(),
-                            getHelper())
-                    );
+            adapter = new MessageAdapter(this,
+                    R.layout.message,
+                    BACKEND.getMessageDao().queryBuilder().orderBy(Message.TIMESTAMP_FIELD, true)
+                    .where().eq(Message.CONVERSATION_FIELD, conversation).prepare(),
+                    BACKEND.getHelper());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        listMessages.setAdapter(adapter);
         listMessages.setItemsCanFocus(false);
+        int position = adapter.getCount() - 1;
+        listMessages.smoothScrollToPosition(position > 0 ? position : 0);
         
         ((TextView)findViewById(R.id.labelHeader)).setText("Placeholder conversation text");
         // Show right button.
@@ -64,7 +63,8 @@ public class ConversationActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         btnAddUser.setOnClickListener(new OnClickListener() {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), ContactPickerActivity.class);
-                startActivityForResult(intent, Request.ADD_CONTACT.ordinal());
+                intent.putExtra("conversation_id", conversation.getID());
+                startActivityForResult(intent, ADD_CONTACT);
             }
         });
         
@@ -94,12 +94,12 @@ public class ConversationActivity extends OrmLiteBaseActivity<DatabaseHelper> {
             public void onConversationUpdated() {
                 runOnUiThread(new Runnable() {
                    public void run() {
-                        title.setText(Common.formatConversationTitle(conversation));
-                        icon.setImageResource(Common.getConversationIcon(conversation));
-                        BaseAdapter adapter = ((BaseAdapter)listMessages.getAdapter());
-                        adapter.notifyDataSetChanged();
-                        int position = adapter.getCount() - 1;
-                        listMessages.smoothScrollToPosition(position > 0 ? position : 0);
+                       title.setText(Common.formatConversationTitle(conversation));
+                       icon.setImageResource(Common.getConversationIcon(conversation));
+                       adapter.update();
+                       adapter.notifyDataSetChanged();
+                       int position = adapter.getCount() - 1;
+                       listMessages.smoothScrollToPosition(position > 0 ? position : 0);
                    }
                 });
             }
@@ -111,10 +111,10 @@ public class ConversationActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         if (result != Activity.RESULT_OK) {
             return;
         }
-        switch (Request.valueOf(request)) {
+        switch (request) {
             case ADD_CONTACT:
                 try {
-                    conversation.addMember(backend.getPerson(data.getStringExtra("id")));
+                    conversation.addMember(BACKEND.getPerson(data.getStringExtra("id")));
                 } catch (SQLException e) {
                     new RuntimeException(e);
                 }

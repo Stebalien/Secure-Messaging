@@ -133,11 +133,12 @@ public class Person {
     private PreparedQuery<Conversation> getConversationQuery() throws SQLException {
         if (conversationQuery == null) {
             QueryBuilder<Membership, String> subQuery = BACKEND.getMembershipDao().queryBuilder();
-            subQuery.selectColumns(Membership.PERSON_FIELD);
-            subQuery.where().eq(Membership.CONVERSATION_FIELD, this);
+            subQuery.selectColumns(Membership.CONVERSATION_FIELD);
+            subQuery.where().eq(Membership.PERSON_FIELD, this);
             
             QueryBuilder<Conversation, String> outerQuery = BACKEND.getConversationDao().queryBuilder();
             outerQuery.where().in(Conversation.ID_FIELD, subQuery);
+            outerQuery.orderBy(Conversation.TIMESTAMP_FIELD, false);
             
             conversationQuery = outerQuery.prepare();
         }
@@ -151,6 +152,14 @@ public class Person {
     public List<Conversation> getConversations()  {
         try {
             return BACKEND.getConversationDao().query(getConversationQuery());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public Conversation getLastConversation() {
+        try {
+            return BACKEND.getConversationDao().queryForFirst(getConversationQuery());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

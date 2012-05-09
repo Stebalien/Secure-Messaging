@@ -2,9 +2,10 @@ package edu.mit.securemessaging.activities;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
+import com.j256.ormlite.stmt.QueryBuilder;
 
-import edu.mit.securemessaging.DatabaseHelper;
+import edu.mit.securemessaging.Backend;
+import edu.mit.securemessaging.Membership;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
@@ -18,20 +19,34 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ContactPickerActivity extends OrmLiteBaseActivity<DatabaseHelper> {
+public class ContactPickerActivity extends Activity {
+    private static Backend BACKEND = null;
     /** Called when the activity is first created. */
     private ListView contactList;
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (BACKEND == null) BACKEND = Backend.getInstance();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contact_picker);
         contactList = (ListView)findViewById(R.id.contactList);
+        contactList.setEmptyView((TextView)findViewById(R.id.contactListEmpty));
+        String id = getIntent().getStringExtra("conversation_id");
         try {
+            QueryBuilder<Person, String> b = BACKEND.getPersonDao().queryBuilder();
+            b.orderBy(Person.NAME_FIELD, false);
+            if (id != null) {
+                QueryBuilder<Membership, String> subQuery = BACKEND.getMembershipDao().queryBuilder();
+                subQuery.selectColumns(Membership.PERSON_FIELD);
+                subQuery.where().eq(Membership.CONVERSATION_FIELD, id);
+                b.where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).and().notIn(Person.ID_FIELD, subQuery);
+            } else {
+                b.where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME);
+            }
             contactList.setAdapter(
                     new ContactAdapter(this,
                             R.layout.contact,
-                            getHelper().getPersonDao().queryBuilder().orderBy("name", false).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
-                            getHelper())
+                            b.prepare(),
+                            BACKEND.getHelper())
                     );
         } catch (SQLException e) {
             throw new RuntimeException(e);

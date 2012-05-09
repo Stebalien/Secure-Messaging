@@ -2,11 +2,9 @@ package edu.mit.securemessaging.activities;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
-
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Backend.ContactsListener;
-import edu.mit.securemessaging.DatabaseHelper;
+import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
@@ -21,35 +19,49 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ContactsActivity extends OrmLiteBaseActivity<DatabaseHelper> {
-    protected static enum ContactDialog {
-        ADD_CONTACT, DELETE_CONTACT, DELETE_CONTACT_CONFIRM, DELETE_CONTACT_CONFIRM_WIPE;
-        public static ContactDialog valueOf(int ordinal) {
-            return values()[ordinal];
-        }
-    }
+public class ContactsActivity extends Activity {
+    private static Backend BACKEND = null;
+    
+    // Use ints for speed as recommended by android. (Really? speed+java?)
+    protected static final int DIALOG_ADD = 1;
+    protected static final int DIALOG_MODIFY = 2;
+    protected static final int DIALOG_DELETE = 3;
+    protected static final int DIALOG_DELETE_CONFIRM = 4;
+    protected static final int DIALOG_DELETE_CONFIRM_WIPE = 5;
+    
+    // Add dialog indices
+    protected static final int DIALOG_ADD_BARCODE = 0;
+    protected static final int DIALOG_ADD_MANUAL = 1;
+    
+    // Modify dialog indices
+    protected static final int DIALOG_MODIFY_EDIT = 0;
+    protected static final int DIALOG_MODIFY_DELETE = 1;
+    
     /** Called when the activity is first created. */
     private ListView contactList;
     private Button btnAddContact;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (BACKEND == null) BACKEND = Backend.getInstance();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contacts);
         Backend backend = Backend.getInstance();
         contactList = (ListView)findViewById(R.id.contactList);
+        contactList.setEmptyView(findViewById(R.id.contactListEmpty));
         try {
             contactList.setAdapter(
                     new ContactAdapter(this,
                             R.layout.contact,
-                            getHelper().getPersonDao().queryBuilder().orderBy("name", false).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
-                            getHelper())
+                            BACKEND.getPersonDao().queryBuilder().orderBy("name", false).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
+                            BACKEND.getHelper())
                     );
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -57,8 +69,28 @@ public class ContactsActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         
         contactList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                editContact((Person)parent.getItemAtPosition(position));
+                // TODO: Does this make sense? We can also filter or find last updated.
+                Person person = ((Person)parent.getItemAtPosition(position));
+                Conversation conversation = person.getLastConversation();
+                if (conversation == null) {
+                    conversation = BACKEND.newConversation();
+                    conversation.addMember(person);
+                }
+                
+                Intent intent = new Intent(view.getContext(), ConversationActivity.class);
+                intent.putExtra("id", conversation.getID());
+                startActivity(intent);
             }
+        });
+        
+        contactList.setOnItemLongClickListener(new OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Bundle args = new Bundle();
+                args.putString("id", ((Person)parent.getItemAtPosition(position)).getID());
+                showDialog(DIALOG_MODIFY,  args);
+                return true;
+            }
+            
         });
         
         // Show right button.
@@ -67,7 +99,7 @@ public class ContactsActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         btnAddContact.setVisibility(View.VISIBLE);
         btnAddContact.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                showDialog(ContactDialog.ADD_CONTACT.ordinal());
+                showDialog(DIALOG_ADD);
             }
         });
         
@@ -86,43 +118,87 @@ public class ContactsActivity extends OrmLiteBaseActivity<DatabaseHelper> {
         });
     }
     
-    protected Dialog onCreateDialog(int id) {
-        Dialog dialog;
-        switch(ContactDialog.valueOf(id)) {
-            case ADD_CONTACT:
-                return createAddDialog();
+    @Override
+    protected Dialog onCreateDialog(int id, final Bundle bundle) {
+        final Dialog dialog;
+        final String personId;
+        switch(id) {
+            case DIALOG_ADD:
+                dialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_add_contact_title)
+                        .setItems(R.array.dialog_add_contact_menu, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int item) {
+                                switch(item) {
+                                    case DIALOG_ADD_BARCODE:
+                                        Toast.makeText(getApplicationContext(), "You have scanned someone's barcode.", Toast.LENGTH_LONG).show();
+                                        break;
+                                    case DIALOG_ADD_MANUAL:
+                                        addContact();
+                                        break;
+                                }
+                            }
+                        }).create();
+                dialog.setCancelable(true);
+                break;
+            case DIALOG_MODIFY:
+                personId = bundle.getString("id");
+                try {
+                    dialog = new AlertDialog.Builder(this)
+                            .setTitle(getResources().getString(
+                                    R.string.dialog_modify_contact_title,
+                                    BACKEND.getPersonDao().queryForId(personId).getName()))
+                                    .setItems( R.array.dialog_modify_contact_menu, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int item) {
+                                    switch(item) {
+                                        case DIALOG_MODIFY_EDIT:
+                                            editContact(personId);
+                                            break;
+                                        case DIALOG_MODIFY_DELETE:
+                                            showDialog(DIALOG_DELETE, bundle);
+                                            break;
+                                    }
+                                }
+                            }).create();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                dialog.setCancelable(true);
+                break;
+            case DIALOG_DELETE:
+                personId = bundle.getString("id");
+                try {
+                    dialog = new AlertDialog.Builder(this)
+                            .setTitle(R.string.dialog_delete_contact_title)
+                            .setMessage(getResources().getString(
+                                    R.string.dialog_delete_contact_message,
+                                    BACKEND.getPersonDao().queryForId(personId).getName()))
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int item) {
+                                    showDialog(DIALOG_DELETE_CONFIRM, bundle);
+                            }})
+                            .setNegativeButton(android.R.string.no, null).create();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                dialog.setCancelable(true);
+                break;
+            case DIALOG_DELETE_CONFIRM:
+                    Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
             default:
                 dialog = null;
         }
         return dialog;
     }
     
-    protected AlertDialog createAddDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final CharSequence[] items = {
-                "Add By Barcode",
-                "Add Manually",
-        };
-        builder.setTitle(R.string.add_contact_title);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                switch(item) {
-                    case 0:
-                        Toast.makeText(getApplicationContext(), "You have scanned someone's barcode.", Toast.LENGTH_LONG).show();
-                        break;
-                    case 1:
-                        addContact();
-                        break;
-                }
-            }
-        });
-        return builder.create();
+    public void editContact(String contactID) {
+        Intent intent = new Intent(this, EditContactActivity.class);
+        intent.putExtra("id", contactID);
+        startActivityForResult(intent, 0); // Should be const later TODO
     }
     
+    
     public void editContact(Person contact) {
-        Intent intent = new Intent(this, EditContactActivity.class);
-        intent.putExtra("id", contact.getID());
-        startActivityForResult(intent, 0); // Should be const later TODO
+        editContact(contact.getID());
     }
     
     public void addContact() {

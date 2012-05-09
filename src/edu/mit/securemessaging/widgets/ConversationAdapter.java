@@ -1,8 +1,6 @@
 package edu.mit.securemessaging.widgets;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -46,21 +44,21 @@ public class ConversationAdapter extends SimpleQueryAdapter<Conversation> {
 
         @Override
         public void update(Conversation convo) {
-        	List<Message> messageList = new ArrayList<Message>(convo.getMessages());
-        	
         	memberText.setText(Common.formatConversationTitle(convo));
         	
         	//set timestamp Textfield
         	timeDisplay.setText(Common.formatDate(convo.getTimestamp()));
         		
-            if(messageList.isEmpty())
-            	this.messagePreview.setText("No messages");
-            else
-                try {
-                    this.messagePreview.setText(convo.getLatestMessage().getContents());
-                } catch (SQLException e) {
-                    this.messagePreview.setText("");
-                }
+            try {
+            	Message m = convo.getLatestMessage();
+            	if (m == null) {
+            	    this.messagePreview.setText("No messages");
+            	} else {
+                    this.messagePreview.setText(m.getContents());
+            	}
+            } catch (SQLException e) {
+                this.messagePreview.setText("");
+            }
             
             icon.setImageResource(Common.getConversationIcon(convo));
             

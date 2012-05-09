@@ -45,6 +45,9 @@ public class Backend extends Application {
         return memberships;
     }
     
+    public DatabaseHelper getHelper() {
+        return db;
+    }
     
     @Override
     public void onCreate() {

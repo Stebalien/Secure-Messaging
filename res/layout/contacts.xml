@@ -10,5 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </ListView>
+    
+    <TextView
+        android:id="@+id/contactListEmpty"
+        android:layout_gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:text="@string/contacts_empty" />
 
 </LinearLayout>

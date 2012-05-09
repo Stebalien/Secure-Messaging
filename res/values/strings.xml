@@ -20,7 +20,7 @@
     <string name="contact_picker_title">Pick A Contact</string>
     <string name="new_conversation">New</string>
     <string name="conversations_title">Inbox</string>
-    <string name="add_contact_title">Add Contact</string>
+    <string name="dialog_add_contact_title">Add Contact</string>
     <string name="verified_checkbox">I know this user</string>
     <string name="name_hint">Full Name</string>
     <string name="username_hint">Username</string>
@@ -30,4 +30,20 @@
     <color name="error_foreground">#ff0000</color>
     <string name="invalid_name">* Invalid Name</string>
     <string name="conflict_name">* You already have a contact by this name.</string>
+    <string-array name="dialog_add_contact_menu">
+        <item >Add By Barcode</item>
+        <item >Add Manually</item>
+    </string-array>
+    <string name="dialog_modify_contact_title">Modify %s</string>
+    <string-array name="dialog_modify_contact_menu">
+        <item >Edit Contact</item>
+        <item >Delete Contact</item>
+    </string-array>
+    <string name="add_contact_title">Add Contact</string>
+    <string name="dialog_delete_contact_message">Are you sure you want to delete &quot;%s&quot;?</string>
+    <string name="dialog_delete_contact_title">Delete Contact</string>
+    <string name="contact_picker_empty">Nobody To Add</string>
+    <string name="contacts_empty">No Contacts</string>
+    <string name="conversation_empty">No Messages</string>
+    <string name="inbox_empty">No Conversations</string>
 </resources>

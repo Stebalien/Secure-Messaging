@@ -2,10 +2,8 @@ package edu.mit.securemessaging.activities;
 
 import java.sql.SQLException;
 
-import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 
 import edu.mit.securemessaging.Backend;
-import edu.mit.securemessaging.DatabaseHelper;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
@@ -18,7 +16,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class EditContactActivity extends OrmLiteBaseActivity<DatabaseHelper> {
+public class EditContactActivity extends Activity {
     /** Called when the activity is first created. */
     private Backend backend = Backend.getInstance();
     private EditText name;
