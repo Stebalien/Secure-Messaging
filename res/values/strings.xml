@@ -46,4 +46,13 @@
     <string name="contacts_empty">No Contacts</string>
     <string name="conversation_empty">No Messages</string>
     <string name="inbox_empty">No Conversations</string>
+    <color name="faded_text">#777777</color>
+    <string-array name="dialog_set_photo_menu">
+        <item >Browse</item>
+        <item >Take Picture</item>
+        <item >Clear Photo</item>
+    </string-array>
+    <string name="dialog_set_photo_title">Set Photo</string>
+    <string name="create">Create</string>
+    <string name="dialog_add_request_id_hint">Enter User\'s ID</string>
 </resources>

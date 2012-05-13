@@ -5,11 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.EventListener;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.j256.ormlite.field.*;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -19,6 +16,9 @@ import com.j256.ormlite.table.*;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.util.Log;
 
 
 @DatabaseTable(tableName = "person")
@@ -28,9 +28,8 @@ public class Person {
     public static final String TRUST_FIELD = "trustLevel";
     
     private static Backend BACKEND = null;
-    private static final String USER_DIR = "users/%s/";
-    private static final String PHOTO_PATH = USER_DIR + "photo.png";
-    private static final String KEY_PATH = USER_DIR + "key.gpg";
+    private static final String PHOTO_PATH = "%s-photo.jpeg";
+    private static final String KEY_PATH = "%s-key.gpg";
     private static final int BUFFER_SIZE = 4096;
     
     private PreparedQuery<Conversation> conversationQuery = null;
@@ -38,7 +37,7 @@ public class Person {
     @DatabaseField(columnName=ID_FIELD, id=true)
     private String id;
     
-    // Don't bother saving path as it is just users/id/photo.png
+    // Don't bother saving path as it is just id-photo.png
     private Bitmap photo;
     
     @DatabaseField(columnName=NAME_FIELD, unique=true, canBeNull=false)
@@ -46,8 +45,6 @@ public class Person {
     
     @DatabaseField(columnName=TRUST_FIELD, canBeNull=false)
     private TrustLevel trustLevel;
-    
-    private Set<PersonListener> personListeners = new CopyOnWriteArraySet<PersonListener>();
     
     Person() {
         if (BACKEND == null) BACKEND = Backend.getInstance();
@@ -78,19 +75,19 @@ public class Person {
         }
     }
     
-    public Person(String name) {
+    public Person(String id, String name) {
         this(UUID.randomUUID().toString(), name, null, TrustLevel.UNKNOWN, null);
     }
     
-    public Person(String name, TrustLevel trustLevel) {
+    public Person(String id, String name, TrustLevel trustLevel) {
         this(UUID.randomUUID().toString(), name, null, trustLevel, null);
     }
     
-    public Person(String name, InputStream key) {
+    public Person(String id, String name, InputStream key) {
         this(UUID.randomUUID().toString(), name, key, TrustLevel.UNKNOWN, null);
     }
     
-    public Person(String name, InputStream key, TrustLevel trustLevel) {
+    public Person(String id, String name, InputStream key, TrustLevel trustLevel) {
         this(UUID.randomUUID().toString(), name, key, trustLevel, null);
     }
     
@@ -102,10 +99,25 @@ public class Person {
         FileOutputStream file = null;
         try {
             file = BACKEND.openFileOutput(getPhotoPath(), Context.MODE_PRIVATE);
-            photo.compress(Bitmap.CompressFormat.PNG, 90, file);
+            photo.compress(Bitmap.CompressFormat.JPEG, 90, file);
             this.photo = photo;
         } catch (FileNotFoundException e) {
             // This should not hapen (we are writing a file).
+            throw new RuntimeException(e);
+        } finally {
+            if (file != null) {
+                try { file.close(); } catch (IOException e) { }
+            }
+        }
+    }
+    
+    public void setPhoto(Uri uri) {
+        FileOutputStream file = null;
+        try {
+            file = BACKEND.openFileOutput(getPhotoPath(), Context.MODE_PRIVATE);
+            photo = MediaStore.Images.Media.getBitmap(BACKEND.getContentResolver(), uri);
+            photo.compress(Bitmap.CompressFormat.JPEG, 90, file);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
             if (file != null) {
@@ -125,7 +137,11 @@ public class Person {
     public Bitmap getPhoto() {
         // TODO: Set external resource.
         if (photo == null) {
-            photo = BitmapFactory.decodeFile(getPhotoPath());
+            try {
+                photo = BitmapFactory.decodeStream(BACKEND.openFileInput(getPhotoPath()));
+            } catch (FileNotFoundException e) {
+                // pass
+            }
         }
         return photo;
     }
@@ -269,24 +285,5 @@ public class Person {
     
     public String getID() {
         return id;
-    }
-    
-    protected void firePersonUpdated() {
-        for (PersonListener l : personListeners) {
-            l.onPersonUpdated();
-        }
-    }
-    
-    public void addPersonListener(PersonListener listener) {
-        personListeners.add(listener);
-    }
-    
-    public void removePersonListener(PersonListener listener) {
-        personListeners.remove(listener);
-    }
-    
-    // Unused for now.
-    public static interface PersonListener extends EventListener {
-        public void onPersonUpdated();
     }
 }

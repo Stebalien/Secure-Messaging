@@ -9,6 +9,7 @@ import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
 import edu.mit.securemessaging.widgets.ContactAdapter;
+import edu.mit.securemessaging.widgets.SimpleQueryAdapter;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -22,6 +23,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,7 @@ public class ContactsActivity extends Activity {
     protected static final int DIALOG_DELETE = 3;
     protected static final int DIALOG_DELETE_CONFIRM = 4;
     protected static final int DIALOG_DELETE_CONFIRM_WIPE = 5;
+    protected static final int DIALOG_ADD_REQUEST_ID = 6;
     
     // Add dialog indices
     protected static final int DIALOG_ADD_BARCODE = 0;
@@ -110,7 +113,9 @@ public class ContactsActivity extends Activity {
             public void onContactsUpdated() {
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        BaseAdapter adapter = ((BaseAdapter)contactList.getAdapter());
+                        @SuppressWarnings("unchecked")
+                        SimpleQueryAdapter<Person> adapter = ((SimpleQueryAdapter<Person>)contactList.getAdapter());
+                        adapter.update();
                         adapter.notifyDataSetChanged();
                     }
                 });
@@ -133,7 +138,7 @@ public class ContactsActivity extends Activity {
                                         Toast.makeText(getApplicationContext(), "You have scanned someone's barcode.", Toast.LENGTH_LONG).show();
                                         break;
                                     case DIALOG_ADD_MANUAL:
-                                        addContact();
+                                        showDialog(DIALOG_ADD_REQUEST_ID);
                                         break;
                                 }
                             }
@@ -163,6 +168,20 @@ public class ContactsActivity extends Activity {
                     throw new RuntimeException(e);
                 }
                 dialog.setCancelable(true);
+                break;
+            case DIALOG_ADD_REQUEST_ID:
+                final EditText idField = new EditText(this);
+                idField.setHint(R.string.dialog_add_request_id_hint);
+                dialog = new AlertDialog.Builder(this)
+                        .setView(idField)
+                        .setTitle(R.string.add_contact_title)
+                        .setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int item) {
+                                editContact(idField.getText().toString());
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .create();
                 break;
             case DIALOG_DELETE:
                 personId = bundle.getString("id");
@@ -196,14 +215,8 @@ public class ContactsActivity extends Activity {
         startActivityForResult(intent, 0); // Should be const later TODO
     }
     
-    
     public void editContact(Person contact) {
         editContact(contact.getID());
-    }
-    
-    public void addContact() {
-        Intent intent = new Intent(this, EditContactActivity.class);
-        startActivityForResult(intent, 0); // Should be const later TODO
     }
     
     public void onActivityResult(int request, int result, Intent data) {
@@ -211,7 +224,7 @@ public class ContactsActivity extends Activity {
             return;
         }
         if (request == 0) {
-            ((BaseAdapter)contactList.getAdapter()).notifyDataSetChanged();
+            BACKEND.fireContactsUpdated();
         }
         
     }

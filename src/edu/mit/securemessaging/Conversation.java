@@ -5,14 +5,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.ForeignCollection;
@@ -52,7 +49,6 @@ public class Conversation {
     @ForeignCollectionField(eager = true)
     private ForeignCollection<Membership> memberships;
     
-    private final Set<ConversationListener> conversationListeners = new CopyOnWriteArraySet<ConversationListener>();
     private final Timer fake_reply_timer = new Timer();
     
     private PreparedQuery<Person> personQuery = null;
@@ -61,10 +57,15 @@ public class Conversation {
     private PreparedQuery<Message> lastMessageQuery = null;
     
     public Conversation() {
-        id = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString());
+    }
+    
+    public Conversation(String id) {
+        this.id = id;
         this.timestamp = new Date();
         if (BACKEND == null) BACKEND = Backend.getInstance();
     }
+    
     
     public Collection<Message> getMessages() {
         return Collections.unmodifiableCollection(messages);
@@ -199,7 +200,21 @@ public class Conversation {
         status = Status.UNREAD;
         timestamp = m.getTimestamp();
         update();
-        fireConversationUpdated();
+        BACKEND.fireConversationUpdated(this.id);
+        BACKEND.fireInboxUpdated();
+    }
+    
+    protected void addMessages(Collection<Message> messages) throws SQLException {
+        this.messages.addAll(messages);
+        for (Message m : messages) {
+            this.messages.update(m);
+        }
+        
+        status = Status.UNREAD;
+        timestamp = getLatestMessage().getTimestamp();
+        update();
+        BACKEND.fireConversationUpdated(this.id);
+        BACKEND.fireInboxUpdated();
     }
     
     /**
@@ -242,7 +257,8 @@ public class Conversation {
         } catch (SQLException e) {
             return false;
         }
-        fireConversationUpdated();
+        BACKEND.fireConversationUpdated(this.id);
+        BACKEND.fireInboxUpdated();
         return true;
     }
     
@@ -258,7 +274,8 @@ public class Conversation {
         } catch (SQLException e) {
             return false;
         }
-        fireConversationUpdated();
+        BACKEND.fireConversationUpdated(this.id);
+        BACKEND.fireInboxUpdated();
         return true;
     }
     
@@ -294,25 +311,6 @@ public class Conversation {
         if (!this.status.equals(status)) {
             this.status = status;
         }
-    }
-    
-    protected void fireConversationUpdated() {
-        for (ConversationListener l : conversationListeners) {
-            l.onConversationUpdated();
-        }
-        BACKEND.fireInboxUpdated();
-    }
-    
-    public void addConversationListener(ConversationListener listener) {
-        conversationListeners.add(listener);
-    }
-    
-    public void removeConversationListener(ConversationListener listener) {
-        conversationListeners.remove(listener);
-    }
-    
-    public static interface ConversationListener extends EventListener {
-        public void onConversationUpdated();
     }
     
     /**

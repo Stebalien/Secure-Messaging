@@ -2,9 +2,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="fill_vertical"
     android:orientation="vertical" >
+
     <include android:id="@+id/editContactTitle" layout="@layout/title" />
 
+    <ImageButton
+        android:id="@+id/photoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="10dp"
+        android:src="@drawable/ic_default_photo" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/lableFingerprint1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="This is the fingerprint"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/faded_text" />
+
+        <TextView
+            android:id="@+id/lableFingerprint2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Part 2"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/faded_text" />
+
+    </LinearLayout>
+    
     <EditText
         android:id="@+id/txtName"
         android:layout_width="match_parent"
@@ -21,25 +56,31 @@
         android:id="@+id/lableNameError"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
         android:layout_margin="2dp"
         android:text="@string/invalid_name"
         android:visibility="gone"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/error_foreground" />
 
-    <CheckBox
-        android:id="@+id/chkVerified"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:text="@string/verified_checkbox" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <Button
-        android:id="@+id/btnSave"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:text="@string/save_text" />
+        <CheckBox
+            android:id="@+id/chkVerified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:layout_weight="1.0"
+            android:text="@string/verified_checkbox" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="@string/save_text" />
+
+    </LinearLayout>
 
 </LinearLayout>

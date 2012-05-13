@@ -1,6 +1,7 @@
 package edu.mit.securemessaging.activities;
 
 import edu.mit.securemessaging.Backend;
+import edu.mit.securemessaging.Common;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 
@@ -23,13 +24,6 @@ public class IdentityActivity extends Activity {
         labelName = (TextView)findViewById(R.id.myName);
         labelName.setText(me.getName());
         
-        String fingerprint = me.getID();
-        int half = fingerprint.length()/2;
-        
-        labelFingerprint1 = (TextView)findViewById(R.id.myFingerprint1);
-        labelFingerprint2 = (TextView)findViewById(R.id.myFingerprint2);
-        
-        labelFingerprint1.setText(fingerprint.substring(0, half).replaceAll("(....)", "$1 "));
-        labelFingerprint2.setText(fingerprint.substring(half).replaceAll("(....)", "$1 "));
+        Common.setFormatedKey(me.getID(), (TextView)findViewById(R.id.myFingerprint1), (TextView)findViewById(R.id.myFingerprint2));
     }
 }

@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import android.widget.TextView;
+
 public final class Common {
     private Common() {}
     
@@ -59,5 +61,11 @@ public final class Common {
             default:
                 throw new RuntimeException("Invalid trust level in person");
         }
+    }
+    public static void setFormatedKey(String fingerprint, TextView field1, TextView field2) {
+        int half = fingerprint.length()/2;
+        
+        field1.setText(fingerprint.substring(0, half).replaceAll("(....)", "$1 "));
+        field2.setText(fingerprint.substring(half).replaceAll("(....)", "$1 "));
     }
 }

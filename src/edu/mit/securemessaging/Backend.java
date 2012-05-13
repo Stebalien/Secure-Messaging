@@ -1,6 +1,7 @@
 package edu.mit.securemessaging;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
 import java.util.List;
@@ -21,6 +22,7 @@ public class Backend extends Application {
     
     private final Set<InboxListener> inboxListeners = new CopyOnWriteArraySet<InboxListener>();
     private final Set<ContactsListener> contactsListeners = new CopyOnWriteArraySet<ContactsListener>();
+    private final Set<ConversationListener> conversationListeners = new CopyOnWriteArraySet<ConversationListener>();
     
     private Person me;
     
@@ -141,15 +143,28 @@ public class Backend extends Application {
         }
     }
     
+    public Conversation getOrCreateConversation(String id) throws SQLException {
+        return conversations.createIfNotExists(new Conversation(id));
+    }
+    
     public Person getPerson(String id) throws SQLException {
+        if (id == null) {
+            throw new NullPointerException("null is not a valid person id.");
+        }
         return people.queryForId(id);
+    }
+    
+    public Person getOrCreatePerson(String id, String name) throws SQLException {
+        // I would normally set the key.
+        // TODO: Set key.
+        return people.createIfNotExists(new Person(id, name));
     }
     
     /**
      * Get a list of contacts.
      * @return
      */
-    protected void fireInboxUpdated() {
+    public void fireInboxUpdated() {
         for (InboxListener l : inboxListeners) {
             l.InboxUpdated();
         }
@@ -168,7 +183,7 @@ public class Backend extends Application {
     }
     
     
-    protected void fireContactsUpdated() {
+    public void fireContactsUpdated() {
         for (ContactsListener l : contactsListeners) {
             l.onContactsUpdated();
         }
@@ -203,9 +218,16 @@ public class Backend extends Application {
      * @throws SQLException 
      */
     public void removePerson(Person person) throws SQLException {
+        List<Conversation> convs = person.getConversations();
+        
         DeleteBuilder<Membership, String> memberDeleteBuilder = getMembershipDao().deleteBuilder();
         memberDeleteBuilder.where().eq(Membership.PERSON_FIELD, person);
         memberDeleteBuilder.delete();
+        
+        // Fire updates.
+        for (Conversation c : convs) {
+            fireConversationUpdated(c.getID());
+        }
         fireInboxUpdated();
     }
     
@@ -239,6 +261,24 @@ public class Backend extends Application {
             person.setTrustLevel(TrustLevel.KNOWN);
         getPersonDao().createOrUpdate(person);
         fireContactsUpdated();
+    }
+    
+    protected void fireConversationUpdated(String id) {
+        for (ConversationListener l : conversationListeners) {
+            l.onConversationUpdated(id);
+        }
+    }
+    
+    public void addConversationListener(ConversationListener listener) {
+        conversationListeners.add(listener);
+    }
+    
+    public void removeConversationListener(ConversationListener listener) {
+        conversationListeners.remove(listener);
+    }
+    
+    public static interface ConversationListener extends EventListener {
+        public void onConversationUpdated(String id);
     }
     
 }

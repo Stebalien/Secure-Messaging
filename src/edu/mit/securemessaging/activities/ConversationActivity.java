@@ -4,10 +4,10 @@ import java.sql.SQLException;
 
 
 import edu.mit.securemessaging.Backend;
+import edu.mit.securemessaging.Backend.ConversationListener;
 import edu.mit.securemessaging.Common;
 import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.Message;
-import edu.mit.securemessaging.Conversation.ConversationListener;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.widgets.MessageAdapter;
 import android.app.Activity;
@@ -30,12 +30,31 @@ public class ConversationActivity extends Activity {
     private Conversation conversation;
     private TextView title;
     private ImageView icon;
+    private MessageAdapter adapter;
+    
+    private final ConversationListener cListener = new ConversationListener() {
+        public void onConversationUpdated(String id) {
+            if (id != conversation.getID()) {
+                return;
+            }
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    title.setText(Common.formatConversationTitle(conversation));
+                    icon.setImageResource(Common.getConversationIcon(conversation));
+                    adapter.update();
+                    adapter.notifyDataSetChanged();
+                    int position = adapter.getCount() - 1;
+                    listMessages.smoothScrollToPosition(position > 0 ? position : 0);
+                }
+            });
+        }
+    };
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        if (BACKEND == null) BACKEND = Backend.getInstance();
         super.onCreate(savedInstanceState);
         
-        final MessageAdapter adapter;
+        if (BACKEND == null) BACKEND = Backend.getInstance();
         
         setContentView(R.layout.conversation_activity);
         conversation = BACKEND.getConversation(getIntent().getStringExtra("id"));
@@ -53,7 +72,7 @@ public class ConversationActivity extends Activity {
         listMessages.setAdapter(adapter);
         listMessages.setItemsCanFocus(false);
         int position = adapter.getCount() - 1;
-        listMessages.smoothScrollToPosition(position > 0 ? position : 0);
+        listMessages.setSelection(position > 0 ? position : 0);
         
         ((TextView)findViewById(R.id.labelHeader)).setText("Placeholder conversation text");
         // Show right button.
@@ -90,21 +109,13 @@ public class ConversationActivity extends Activity {
             }
         });
         
-        conversation.addConversationListener(new ConversationListener() {
-            public void onConversationUpdated() {
-                runOnUiThread(new Runnable() {
-                   public void run() {
-                       title.setText(Common.formatConversationTitle(conversation));
-                       icon.setImageResource(Common.getConversationIcon(conversation));
-                       adapter.update();
-                       adapter.notifyDataSetChanged();
-                       int position = adapter.getCount() - 1;
-                       listMessages.smoothScrollToPosition(position > 0 ? position : 0);
-                   }
-                });
-            }
-        });
+        BACKEND.addConversationListener(cListener);
         
+    }
+    
+    public void onDestroy() {
+        super.onDestroy();
+        BACKEND.removeConversationListener(cListener);
     }
     
     public void onActivityResult(int request, int result, Intent data) {
