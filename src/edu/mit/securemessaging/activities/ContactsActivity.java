@@ -71,19 +71,6 @@ public class ContactsActivity extends Activity {
         
         contactList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-<<<<<<< HEAD
-                // TODO: Does this make sense? We can also filter or find last updated.
-                Person person = ((Person)parent.getItemAtPosition(position));
-                Conversation conversation = person.getLastConversation();
-                if (conversation == null) {
-                    conversation = BACKEND.newConversation();
-                    conversation.inviteMember(person);
-                }
-                
-                Intent intent = new Intent(view.getContext(), ConversationActivity.class);
-                intent.putExtra("id", conversation.getID());
-                startActivity(intent);
-=======
 //                // TODO: Does this make sense? We can also filter or find last updated.
 //                Person person = ((Person)parent.getItemAtPosition(position));
 //                Conversation conversation = person.getLastConversation();
@@ -97,7 +84,6 @@ public class ContactsActivity extends Activity {
 //                startActivity(intent);
             	  Person person = ((Person)parent.getItemAtPosition(position));
             	  editContact(person.getID());
->>>>>>> Updated Contact Deletion Flow, added checkbox to confirm
             }
         });
         
