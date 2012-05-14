@@ -272,7 +272,6 @@ public class Person {
     }
     
     public boolean deleteQRCode() {
-        qrcodeCache.recycle();
         qrcodeCache = null;
         return BACKEND.deleteFile(getQRCodePath());
     }

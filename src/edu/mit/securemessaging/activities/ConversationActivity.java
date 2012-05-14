@@ -2,6 +2,9 @@ package edu.mit.securemessaging.activities;
 
 import java.sql.SQLException;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Backend.ConversationListener;
@@ -10,6 +13,7 @@ import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.Message;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
+import edu.mit.securemessaging.TrustLevel;
 import edu.mit.securemessaging.widgets.MessageAdapter;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -170,14 +174,22 @@ public class ConversationActivity extends Activity {
                             .setTitle(R.string.dialog_edit_conversation)
                             .setItems( R.array.dialog_modify_conversation_menu, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int item) {
-                                    switch(item) {
+                                	Person person;
+                                	try {
+                                		 person = BACKEND.getMessageDao().queryForId(messageId).getSender();
+                                	switch(item) {
                                     case DIALOG_MODIFY_ADD:
-                                    	//BACKEND.deleteConversations(conversations);
+                                    	editContact(person.getID());
                                         break;
                                     case DIALOG_MODIFY_REMOVE:
-                                        //showDialog(DIALOG_DELETE, bundle);
+                                    	conversation.deleteMessagesFrom(person);
+
                                         break;
                                 }
+									} catch (SQLException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
                                 }
                             }).create();
                 
@@ -196,6 +208,9 @@ public class ConversationActivity extends Activity {
     public void editContact(String contactID) {
         Intent intent = new Intent(this, EditContactActivity.class);
         intent.putExtra("id", contactID);
-        startActivityForResult(intent, 0); // Should be const later TODO
+        startActivityForResult(intent, ADD_CONTACT); // Should be const later TODO
+        
     }
+    
+
 }
