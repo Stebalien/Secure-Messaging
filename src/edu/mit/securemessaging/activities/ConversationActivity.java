@@ -29,11 +29,6 @@ public class ConversationActivity extends Activity {
     private static Backend BACKEND = null;
     private static final int ADD_CONTACT = 1;
     
-    private static final int DIALOG_MODIFY = 1;
-    private static final int DIALOG_DELETE = 2;
-    
-    protected static final int DIALOG_MODIFY_DELETE = 0;
-    
     /** Called when the activity is first created. */
     private ListView listMessages;
     private Conversation conversation;
@@ -126,46 +121,6 @@ public class ConversationActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         BACKEND.removeConversationListener(cListener);
-    }
-    
-    @Override
-    public Dialog onCreateDialog(int id, final Bundle bundle) {
-        Dialog dialog;
-        final String conversationId;
-        switch(id) {
-            case DIALOG_MODIFY:
-                conversationId = bundle.getString("id");
-                dialog = new AlertDialog.Builder(this)
-                        .setTitle(R.string.dialog_modify_conversation_title)
-                        .setItems( R.array.dialog_modify_conversation_menu, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int item) {
-                                switch(item) {
-                                    case DIALOG_MODIFY_DELETE:
-                                        showDialog(DIALOG_DELETE, bundle);
-                                        break;
-                                }
-                            }
-                        }).create();
-                dialog.setCancelable(true);
-                break;
-            case DIALOG_DELETE:
-                conversationId = bundle.getString("id");
-                dialog = new AlertDialog.Builder(this)
-                        .setTitle(R.string.dialog_delete_conversation_title)
-                        .setMessage(R.string.dialog_delete_conversation_message)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int item) {
-                                BACKEND.deleteConversations(BACKEND.getConversation(conversationId));
-                                Toast.makeText(getApplicationContext(), "Conversation Deleted", Toast.LENGTH_SHORT).show();
-                        }})
-                        .setNegativeButton(android.R.string.no, null).create();
-                dialog.setCancelable(true);
-                break;
-            default:
-                dialog = null;
-        }
-        return dialog;
-        
     }
     
     public void onActivityResult(int request, int result, Intent data) {
