@@ -5,7 +5,9 @@
     android:gravity="fill_vertical"
     android:orientation="vertical" >
 
-    <include android:id="@+id/editContactTitle" layout="@layout/title" />
+    <include
+        android:id="@+id/editContactTitle"
+        layout="@layout/title" />
 
     <ImageButton
         android:id="@+id/photoButton"
@@ -39,9 +41,8 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:typeface="monospace"
             android:textColor="@color/faded_text" />
-
     </LinearLayout>
-    
+
     <EditText
         android:id="@+id/txtName"
         android:layout_width="match_parent"
@@ -60,9 +61,9 @@
         android:layout_height="wrap_content"
         android:layout_margin="2dp"
         android:text="@string/invalid_name"
-        android:visibility="gone"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/error_foreground" />
+        android:textColor="@color/error_foreground"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -72,8 +73,8 @@
             android:id="@+id/chkVerified"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
             android:layout_weight="1.0"
+            android:checked="true"
             android:text="@string/verified_checkbox" />
 
         <Button
@@ -82,7 +83,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:text="@string/save_text" />
-
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_marginTop="20dp"
+        android:layout_width="250dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:background="@color/error_foreground"
+        android:text="@string/delete_text"/>
 
 </LinearLayout>

@@ -138,6 +138,15 @@ public class Backend extends Application {
         }
     }
     
+	public void deleteConversations(List<Conversation> conversations) {
+		// TODO Auto-generated method stub
+        try {
+            this.conversations.delete(conversations);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+	}
+    
     /**
      * Mark the given conversations with a status.
      * @param status
@@ -321,6 +330,9 @@ public class Backend extends Application {
     public static interface ConversationListener extends EventListener {
         public void onConversationUpdated(String id);
     }
+
+
+
     
     public String sign(String message) {
         try {
