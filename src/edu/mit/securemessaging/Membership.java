@@ -37,5 +37,36 @@ public class Membership {
     public Person getPersion() {
         return person;
     }
-    
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((conversation == null) ? 0 : conversation.hashCode());
+        result = prime * result + ((person == null) ? 0 : person.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Membership other = (Membership) obj;
+        if (conversation == null) {
+            if (other.conversation != null)
+                return false;
+        } else if (!conversation.equals(other.conversation))
+            return false;
+        if (person == null) {
+            if (other.person != null)
+                return false;
+        } else if (!person.equals(other.person))
+            return false;
+        return true;
+    }
 }

@@ -2,19 +2,108 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:gravity="left|right"
     android:orientation="vertical" >
-    <include android:id="@+id/settingsTitle" layout="@layout/title" />
 
-    <CheckBox
-        android:id="@+id/settingCheckbox01"
+    <include
+        android:id="@+id/settingsTitle"
+        layout="@layout/title" />
+
+    <LinearLayout
+        android:id="@+id/groupSetupName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Random Setting 1" />
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:orientation="vertical" >
 
-    <CheckBox
-        android:id="@+id/settingCheckbox02"
+        <TextView
+            android:id="@+id/labelSetupName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/name_label"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/txtSetupName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/name_hint"
+            android:inputType="textPersonName" />
+        
+	    <TextView
+	        android:id="@+id/labelNameError"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_margin="2dp"
+	        android:text="@string/invalid_name"
+	        android:visibility="gone"
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+	        android:textColor="@color/error_foreground" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/groupSetupPassword"
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Random Setting 2" />
+        android:layout_gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/labelSetupPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_password_label"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/txtSetupPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/password_prompt"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/txtSetupPasswordConfirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/password_confirm"
+            android:inputType="textPassword" />
+    
+	    <TextView
+	        android:id="@+id/labelPasswordError"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_margin="2dp"
+	        android:text="@string/password_mismatch"
+	        android:visibility="gone"
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+	        android:textColor="@color/error_foreground" />
+	    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:gravity="right"
+        android:layout_margin="10dp"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/btnReset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reset" />
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save" />
+
+    </LinearLayout>
 
 </LinearLayout>

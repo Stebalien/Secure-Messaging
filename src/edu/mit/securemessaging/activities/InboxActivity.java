@@ -8,6 +8,7 @@ import edu.mit.securemessaging.Backend.InboxListener;
 import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.widgets.ConversationAdapter;
+import edu.mit.securemessaging.widgets.SimpleQueryAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,6 +24,7 @@ public class InboxActivity extends Activity {
     /** Called when the activity is first created. */
     private static Backend BACKEND = null;
     private ListView conversationList;
+    private SimpleQueryAdapter<Conversation> adapter;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if (BACKEND == null) BACKEND = Backend.getInstance();
@@ -33,15 +34,14 @@ public class InboxActivity extends Activity {
         conversationList = (ListView)findViewById(R.id.conversationList);
         conversationList.setEmptyView(findViewById(R.id.inboxEmpty));
         try {
-            conversationList.setAdapter(
-                    new ConversationAdapter(this,
-                            R.layout.conversation,
-                            BACKEND.getConversationDao().queryBuilder().orderBy("timestamp", false).prepare(),
-                            BACKEND.getHelper())
-                    );
+            adapter = new ConversationAdapter(this,
+                    R.layout.conversation,
+                    BACKEND.getConversationDao().queryBuilder().orderBy("timestamp", false).prepare(),
+                    BACKEND.getHelper());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        conversationList.setAdapter(adapter);
 
         conversationList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -68,7 +68,8 @@ public class InboxActivity extends Activity {
             public void InboxUpdated() {
                 runOnUiThread(new Runnable() {
                    public void run() {
-                        ((BaseAdapter)conversationList.getAdapter()).notifyDataSetChanged();
+                       adapter.update();
+                       adapter.notifyDataSetChanged();
                    }
                 });
             }

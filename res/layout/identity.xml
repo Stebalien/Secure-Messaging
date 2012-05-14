@@ -13,35 +13,46 @@
         android:layout_width="276dp"
         android:layout_height="272dp"
         android:layout_gravity="center"
-        android:scaleType="fitStart"
         android:padding="5dp"
+        android:scaleType="fitStart"
         android:src="@drawable/qrcode" />
-    	
+
     <TextView
         android:id="@+id/myName"
         android:layout_width="match_parent"
+        android:layout_margin="10dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:text="User"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
-        android:id="@+id/myFingerprint1"
+    <LinearLayout
+        android:id="@+id/groupIdentityKey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:gravity="center"
-        android:text="@string/active_usercode"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-    
-    <TextView
-        android:id="@+id/myFingerprint2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:gravity="center"
-        android:text="@string/active_usercode"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-		
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/myFingerprint1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/active_usercode"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/faded_text"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/myFingerprint2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/active_usercode"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/faded_text"
+            android:typeface="monospace" />
+    </LinearLayout>
+
 </LinearLayout>

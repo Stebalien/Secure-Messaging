@@ -21,7 +21,6 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -77,7 +76,7 @@ public class ContactsActivity extends Activity {
                 Conversation conversation = person.getLastConversation();
                 if (conversation == null) {
                     conversation = BACKEND.newConversation();
-                    conversation.addMember(person);
+                    conversation.inviteMember(person);
                 }
                 
                 Intent intent = new Intent(view.getContext(), ConversationActivity.class);

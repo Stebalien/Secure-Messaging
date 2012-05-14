@@ -34,7 +34,7 @@ public class ConversationActivity extends Activity {
     
     private final ConversationListener cListener = new ConversationListener() {
         public void onConversationUpdated(String id) {
-            if (id != conversation.getID()) {
+            if (!id.equals(conversation.getID())) {
                 return;
             }
             runOnUiThread(new Runnable() {
@@ -125,7 +125,7 @@ public class ConversationActivity extends Activity {
         switch (request) {
             case ADD_CONTACT:
                 try {
-                    conversation.addMember(BACKEND.getPerson(data.getStringExtra("id")));
+                    conversation.inviteMember(BACKEND.getPerson(data.getStringExtra("id")));
                 } catch (SQLException e) {
                     new RuntimeException(e);
                 }

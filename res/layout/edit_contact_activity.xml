@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:text="This is the fingerprint"
             android:textAppearance="?android:attr/textAppearanceSmall"
+            android:typeface="monospace"
             android:textColor="@color/faded_text" />
 
         <TextView
@@ -36,6 +37,7 @@
             android:layout_height="wrap_content"
             android:text="Part 2"
             android:textAppearance="?android:attr/textAppearanceSmall"
+            android:typeface="monospace"
             android:textColor="@color/faded_text" />
 
     </LinearLayout>

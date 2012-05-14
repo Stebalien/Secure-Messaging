@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 
 import com.j256.ormlite.dao.CloseableIterator;
@@ -22,18 +19,15 @@ import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "conversation")
 public class Conversation {
-    private static final Random RAND = new Random();
     private static Backend BACKEND;
     
     public static final String ID_FIELD = "_id";
     public static final String TIMESTAMP_FIELD = "timestamp";
     public static final String STATUS_FIELD = "status";
     
-    
-    
     // Stores the conversation's ID
     @DatabaseField(columnName = ID_FIELD, id = true)
-    private final String id;
+    private String id;
     
     // Caches the timestamp of the last received message.
     @DatabaseField(columnName = TIMESTAMP_FIELD)
@@ -49,8 +43,6 @@ public class Conversation {
     @ForeignCollectionField(eager = true)
     private ForeignCollection<Membership> memberships;
     
-    private final Timer fake_reply_timer = new Timer();
-    
     private PreparedQuery<Person> personQuery = null;
     private PreparedQuery<Person> trustLevelQuery = null;
     private PreparedQuery<Membership> membershipQuery = null;
@@ -61,11 +53,10 @@ public class Conversation {
     }
     
     public Conversation(String id) {
+        if (BACKEND == null) BACKEND = Backend.getInstance();
         this.id = id;
         this.timestamp = new Date();
-        if (BACKEND == null) BACKEND = Backend.getInstance();
     }
-    
     
     public Collection<Message> getMessages() {
         return Collections.unmodifiableCollection(messages);
@@ -96,6 +87,7 @@ public class Conversation {
         return personQuery;
     }
     
+    
     public PreparedQuery<Person> getTrustLevelQuery() throws SQLException {
         if (trustLevelQuery == null) {
             
@@ -120,7 +112,6 @@ public class Conversation {
             membershipQuery.setArgumentHolderValue(0, person);
             return membershipQuery;
         }
-        
     }
     
     /**
@@ -173,28 +164,14 @@ public class Conversation {
         //TODO: send message
         Message m = new Message(this, BACKEND.getMe(), contents);
         addMessage(m);
-        // Generate response
-        // Slow but good for debugging.
-        final Conversation self = this;
-        List<Person> members = getMembers();
-        if (!members.isEmpty()) {
-            final Message reply = new Message(self, members.get(RAND.nextInt(members.size())), "That's Nice.");
-            fake_reply_timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        addMessage(reply);
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }, 2000);
-        }
-        
+        BACKEND.sendMessage(m);
         return m;
     }
     
-    protected void addMessage(Message m) throws SQLException {
+    protected boolean addMessage(Message m) throws SQLException {
+        if (messages.contains(m)) {
+            return false;
+        }
         messages.add(m);
         messages.update(m);
         status = Status.UNREAD;
@@ -202,6 +179,7 @@ public class Conversation {
         update();
         BACKEND.fireConversationUpdated(this.id);
         BACKEND.fireInboxUpdated();
+        return true;
     }
     
     protected void addMessages(Collection<Message> messages) throws SQLException {
@@ -237,10 +215,27 @@ public class Conversation {
         return id;
     }
     
+    public boolean inviteMember(Person person) {
+        return inviteMember(person, null);
+    }
     /**
      * Add a person to the conversation.
      * @param person - the person to add
      */
+    public boolean inviteMember(Person person, String message) {
+        if (addMember(person)) {
+            if (message == null) {
+                message = String.format("I have invited '%s' to this conversation.", person.getName());
+            }
+            BACKEND.sendInvite(this, person, message);
+            BACKEND.fireConversationUpdated(this.id);
+            BACKEND.fireInboxUpdated();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     public boolean addMember(Person person) {
         Membership m = new Membership(this, person);
         try {
@@ -257,8 +252,6 @@ public class Conversation {
         } catch (SQLException e) {
             return false;
         }
-        BACKEND.fireConversationUpdated(this.id);
-        BACKEND.fireInboxUpdated();
         return true;
     }
     
@@ -329,5 +322,30 @@ public class Conversation {
     
     public void update() throws SQLException {
         BACKEND.getConversationDao().update(this);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Conversation other = (Conversation) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 }
