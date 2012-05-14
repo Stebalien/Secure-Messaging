@@ -35,7 +35,6 @@ public class ContactsActivity extends Activity {
 
     // Use ints for speed as recommended by android. (Really? speed+java?)
     protected static final int DIALOG_ADD = 1;
-    protected static final int DIALOG_MODIFY = 2;
     protected static final int DIALOG_DELETE = 3;
     protected static final int DIALOG_DELETE_CONFIRM = 4;
     protected static final int DIALOG_DELETE_CONFIRM_WIPE = 5;
@@ -44,10 +43,6 @@ public class ContactsActivity extends Activity {
     // Add dialog indices
     protected static final int DIALOG_ADD_BARCODE = 0;
     protected static final int DIALOG_ADD_MANUAL = 1;
-    
-    // Modify dialog indices
-    protected static final int DIALOG_MODIFY_EDIT = 0;
-    protected static final int DIALOG_MODIFY_DELETE = 1;
     
     /** Called when the activity is first created. */
     private ListView contactList;
@@ -74,31 +69,11 @@ public class ContactsActivity extends Activity {
         
         contactList.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                // TODO: Does this make sense? We can also filter or find last updated.
-//                Person person = ((Person)parent.getItemAtPosition(position));
-//                Conversation conversation = person.getLastConversation();
-//                if (conversation == null) {
-//                    conversation = BACKEND.newConversation();
-//                    conversation.addMember(person);
-//                }
-//                
-//                Intent intent = new Intent(view.getContext(), ConversationActivity.class);
-//                intent.putExtra("id", conversation.getID());
-//                startActivity(intent);
             	  Person person = ((Person)parent.getItemAtPosition(position));
             	  editContact(person.getID());
             }
         });
         
-//        contactList.setOnItemLongClickListener(new OnItemLongClickListener() {
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                final Bundle args = new Bundle();
-//                args.putString("id", ((Person)parent.getItemAtPosition(position)).getID());
-//                showDialog(DIALOG_MODIFY,  args);
-//                return true;
-//            }
-//            
-//        });
         
         // Show right button.
         btnAddContact = (Button)findViewById(R.id.btnHeaderRight);
@@ -149,30 +124,6 @@ public class ContactsActivity extends Activity {
                                 }
                             }
                         }).create();
-                dialog.setCancelable(true);
-                break;
-            case DIALOG_MODIFY:
-                personId = bundle.getString("id");
-                try {
-                    dialog = new AlertDialog.Builder(this)
-                            .setTitle(getResources().getString(
-                                    R.string.dialog_modify_contact_title,
-                                    BACKEND.getPersonDao().queryForId(personId).getName()))
-                                    .setItems( R.array.dialog_modify_contact_menu, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int item) {
-                                    switch(item) {
-                                        case DIALOG_MODIFY_EDIT:
-                                            editContact(personId);
-                                            break;
-                                        case DIALOG_MODIFY_DELETE:
-                                            showDialog(DIALOG_DELETE, bundle);
-                                            break;
-                                    }
-                                }
-                            }).create();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
                 dialog.setCancelable(true);
                 break;
             case DIALOG_ADD_REQUEST_ID:

@@ -23,7 +23,6 @@ import edu.mit.securemessaging.DatabaseHelper;
 public class Backend extends Application {
     private static final String PREFERENCES = "global";
     private static Backend INSTANCE = null;
-    private static final String QRCODE_LOCATION = "qrcode.png";
     private DatabaseHelper db;
     private SharedPreferences preferences;
     

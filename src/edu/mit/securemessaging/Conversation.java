@@ -12,6 +12,8 @@ import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.PreparedDelete;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.SelectArg;
@@ -47,6 +49,7 @@ public class Conversation {
     private PreparedQuery<Person> trustLevelQuery = null;
     private PreparedQuery<Membership> membershipQuery = null;
     private PreparedQuery<Message> lastMessageQuery = null;
+    private PreparedDelete<Message> personMessageDelete = null;
     
     public Conversation() {
         this(UUID.randomUUID().toString());
@@ -106,11 +109,23 @@ public class Conversation {
     
     public PreparedQuery<Membership> getMembershipQuery(Person person) throws SQLException {
         if (membershipQuery == null) {
-            membershipQuery = BACKEND.getMembershipDao().queryBuilder().where().eq(Membership.CONVERSATION_FIELD, this).eq(Membership.PERSON_FIELD, new SelectArg(person)).prepare();
+            membershipQuery = BACKEND.getMembershipDao().queryBuilder().where().eq(Membership.CONVERSATION_FIELD, this).and().eq(Membership.PERSON_FIELD, new SelectArg(person)).prepare();
             return membershipQuery;
         } else {
             membershipQuery.setArgumentHolderValue(0, person);
             return membershipQuery;
+        }
+    }
+    
+    public PreparedDelete<Message> getPersonMessageDelete(Person person) throws SQLException {
+        if (personMessageDelete == null) {
+            DeleteBuilder<Message, String> dBuilder = BACKEND.getMessageDao().deleteBuilder();
+            dBuilder.where().eq(Message.CONVERSATION_FIELD, this).and().eq(Membership.PERSON_FIELD, new SelectArg(person));
+            personMessageDelete = dBuilder.prepare();
+            return personMessageDelete;
+        } else {
+            personMessageDelete.setArgumentHolderValue(0, person);
+            return personMessageDelete;
         }
     }
     
@@ -264,6 +279,21 @@ public class Conversation {
             Membership m = BACKEND.getMembershipDao().queryForFirst(getMembershipQuery(person));
             memberships.remove(m);
             memberships.update(m);
+        } catch (SQLException e) {
+            return false;
+        }
+        BACKEND.fireConversationUpdated(this.id);
+        BACKEND.fireInboxUpdated();
+        return true;
+    }
+    
+    /**
+     * Remove a person from the conversation.
+     * @param person - the person to remove
+     */
+    public boolean deleteMessagesFrom(Person person) {
+        try {
+            BACKEND.getMessageDao().delete(getPersonMessageDelete(person));
         } catch (SQLException e) {
             return false;
         }
