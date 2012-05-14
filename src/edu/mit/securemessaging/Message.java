@@ -3,6 +3,9 @@ package edu.mit.securemessaging;
 import java.util.Date;
 import java.util.UUID;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -153,5 +156,23 @@ public class Message {
         } else if (!id.equals(other.id))
             return false;
         return true;
+    }
+
+    /**
+     * Serialize the message into a string.
+     */
+    public String toString() {
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("contents", contents);
+            obj.put("sender_id", sender.getID());
+            obj.put("sender_name", sender.getName());
+            obj.put("conversation_id", conversation.getID());
+            obj.put("type", type.toString());
+            obj.put("extra", extra);
+            return obj.toString();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

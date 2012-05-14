@@ -9,9 +9,9 @@
         layout="@layout/title" />
 
     <ImageView
-        android:id="@+id/exampleQrCode"
-        android:layout_width="276dp"
-        android:layout_height="272dp"
+        android:id="@+id/QRCode"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
         android:layout_gravity="center"
         android:padding="5dp"
         android:scaleType="fitStart"

@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
     /** Called when the activity is first created. */
@@ -39,6 +40,7 @@ public class SettingsActivity extends Activity {
         ((Button)findViewById(R.id.btnReset)).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 reset();
+                Toast.makeText(getBaseContext(), "Changes Discarded", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -77,8 +79,7 @@ public class SettingsActivity extends Activity {
                     me.refresh();
                     return;
                 }
-
-                finish();
+                Toast.makeText(getBaseContext(), "Profile Saved", Toast.LENGTH_SHORT).show();
             }
         });
         reset();

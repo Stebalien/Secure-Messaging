@@ -108,7 +108,7 @@ public class Communicator {
             JSONObject pObj = new JSONObject();
             pObj.put("name", person.getName());
             pObj.put("id", person.getID());
-            send(people, encodeMessage(new Message(conversation, BACKEND.getMe(), message, MessageType.REFERRAL, pObj.toString())));
+            send(people, BACKEND.sign(new Message(conversation, BACKEND.getMe(), message, MessageType.REFERRAL, pObj.toString()).toString()));
             
             JSONArray pArray = new JSONArray();
             for (Person p : people) {
@@ -117,22 +117,14 @@ public class Communicator {
                 o.put("name", p.getName());
                 pArray.put(o);
             }
-            send(person, encodeMessage(new Message(conversation, BACKEND.getMe(), message, MessageType.INVITE, pArray.toString())));
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            send(person, BACKEND.sign(new Message(conversation, BACKEND.getMe(), message, MessageType.INVITE, pArray.toString()).toString()));
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
     }
     
     public void sendMessage(Message m) {
-        try {
-            send(m.getConversation().getMembers(), encodeMessage(m));
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        send(m.getConversation().getMembers(), BACKEND.sign(m.toString()));
     }
     
     /**
@@ -171,17 +163,6 @@ public class Communicator {
     
     private URL getNewMessageURL(String uid) throws MalformedURLException {
         return new URL(String.format(server + NEW_MESSAGE_TEMPLATE, uid));
-    }
-    
-    protected String encodeMessage(Message m) throws JSONException, UnsupportedEncodingException {
-        JSONObject obj = new JSONObject();
-        obj.put("contents", m.getContents());
-        obj.put("sender_id", m.getSender().getID());
-        obj.put("sender_name", m.getSender().getName());
-        obj.put("conversation_id", m.getConversation().getID());
-        obj.put("type", m.getType().toString());
-        obj.put("extra", m.getExtra());
-        return BACKEND.sign(obj.toString());
     }
     
     /**

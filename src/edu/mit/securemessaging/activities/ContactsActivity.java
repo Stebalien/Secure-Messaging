@@ -2,6 +2,9 @@ package edu.mit.securemessaging.activities;
 
 import java.sql.SQLException;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Backend.ContactsListener;
 import edu.mit.securemessaging.Conversation;
@@ -30,6 +33,8 @@ import android.widget.Toast;
 public class ContactsActivity extends Activity {
     private static Backend BACKEND = null;
     
+    private static final int REQUEST_MODIFY_CONTACT = 1;
+
     // Use ints for speed as recommended by android. (Really? speed+java?)
     protected static final int DIALOG_ADD = 1;
     protected static final int DIALOG_MODIFY = 2;
@@ -128,6 +133,7 @@ public class ContactsActivity extends Activity {
     protected Dialog onCreateDialog(int id, final Bundle bundle) {
         final Dialog dialog;
         final String personId;
+        final Activity self = this;
         switch(id) {
             case DIALOG_ADD:
                 dialog = new AlertDialog.Builder(this)
@@ -136,7 +142,8 @@ public class ContactsActivity extends Activity {
                             public void onClick(DialogInterface dialog, int item) {
                                 switch(item) {
                                     case DIALOG_ADD_BARCODE:
-                                        Toast.makeText(getApplicationContext(), "You have scanned someone's barcode.", Toast.LENGTH_LONG).show();
+                                        IntentIntegrator intent = new IntentIntegrator(self);
+                                        intent.initiateScan();
                                         break;
                                     case DIALOG_ADD_MANUAL:
                                         showDialog(DIALOG_ADD_REQUEST_ID);
@@ -213,7 +220,7 @@ public class ContactsActivity extends Activity {
     public void editContact(String contactID) {
         Intent intent = new Intent(this, EditContactActivity.class);
         intent.putExtra("id", contactID);
-        startActivityForResult(intent, 0); // Should be const later TODO
+        startActivityForResult(intent, REQUEST_MODIFY_CONTACT); // Should be const later TODO
     }
     
     public void editContact(Person contact) {
@@ -221,12 +228,16 @@ public class ContactsActivity extends Activity {
     }
     
     public void onActivityResult(int request, int result, Intent data) {
-        if (result != Activity.RESULT_OK) {
-            return;
-        }
-        if (request == 0) {
+        String contents = IntentIntegrator.parseActivityResult(request, result, data).getContents();
+        if (contents != null) {
+            int split = contents.indexOf(':');
+            try {
+                BACKEND.addOrUpdateContact(new Person(contents.substring(0, split), contents.substring(split + 1, contents.length()), TrustLevel.VERIFIED));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (request == REQUEST_MODIFY_CONTACT && result == Activity.RESULT_OK) {
             BACKEND.fireContactsUpdated();
         }
-        
     }
 }

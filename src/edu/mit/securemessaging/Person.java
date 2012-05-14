@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.j256.ormlite.field.*;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -15,6 +19,7 @@ import com.j256.ormlite.table.*;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -27,8 +32,10 @@ public class Person {
     
     private static Backend BACKEND = null;
     private static final String PHOTO_PATH = "%s-photo.jpeg";
+    private static final String QRCODE_PATH = "%s-qrcode.png";
     private static final String KEY_PATH = "%s-key.gpg";
     private static final int BUFFER_SIZE = 4096;
+    public static final int QRCODE_SIZE = 256;
     
     private PreparedQuery<Conversation> conversationQuery = null;
     
@@ -36,7 +43,8 @@ public class Person {
     private String id;
     
     // Don't bother saving path as it is just id-photo.png
-    private Bitmap photo;
+    private Bitmap photo = null;
+    private Bitmap qrcodeCache = null;
     
     @DatabaseField(columnName=NAME_FIELD, unique=true, canBeNull=false)
     private String name;
@@ -89,6 +97,50 @@ public class Person {
         this(id, name, key, trustLevel, null);
     }
     
+    public Bitmap getQRCode() {
+        if (qrcodeCache == null) {
+            try {
+                qrcodeCache = BitmapFactory.decodeStream(BACKEND.openFileInput(getQRCodePath()));
+            } catch (FileNotFoundException _) {
+                BitMatrix qrcodeMatrix;
+                try {
+                    qrcodeMatrix = new QRCodeWriter().encode(String.format("%s:%s", id, name), BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE);
+                } catch (WriterException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+                int matrixWidth = qrcodeMatrix.getWidth();
+                int matrixHeight = qrcodeMatrix.getHeight();
+
+                int[] colors = new int[matrixWidth*matrixHeight];
+                for (int y = 0; y < matrixHeight; y++) {
+                    int offset = y*matrixWidth;
+                    for (int x = 0; x < matrixWidth; x++) {
+                        colors[offset+x] = qrcodeMatrix.get(x, y) ? Color.BLACK : Color.WHITE;
+                    }
+                }
+                qrcodeCache = Bitmap.createBitmap(colors, QRCODE_SIZE, QRCODE_SIZE, Bitmap.Config.RGB_565);
+
+                FileOutputStream file = null;
+                try {
+                    file = BACKEND.openFileOutput(getQRCodePath(), Context.MODE_PRIVATE);
+                    qrcodeCache.compress(Bitmap.CompressFormat.PNG, 100, file);
+                } catch (FileNotFoundException e) {
+                    // This should not hapen (we are writing a file).
+                    throw new RuntimeException(e);
+                } finally {
+                    if (file != null) {
+                        try { file.close(); } catch (IOException e) { }
+                    }
+                }
+            }
+        }
+        return qrcodeCache;
+    }
+
+
+
     /**
      * Set this person's photo.
      * @param photo
@@ -124,6 +176,10 @@ public class Person {
         }
     }
     
+    public String getQRCodePath() {
+        return String.format(QRCODE_PATH, id);
+    }
+
     public String getPhotoPath() {
         return String.format(PHOTO_PATH, id);
     }
@@ -211,9 +267,16 @@ public class Person {
     }
     
     public boolean deletePhoto() {
+        photo = null;
         return BACKEND.deleteFile(getPhotoPath());
     }
     
+    public boolean deleteQRCode() {
+        qrcodeCache.recycle();
+        qrcodeCache = null;
+        return BACKEND.deleteFile(getQRCodePath());
+    }
+
     public boolean hasPhoto() {
         return (photo != null) || BACKEND.getFileStreamPath(getPhotoPath()).exists();
     }
@@ -242,6 +305,7 @@ public class Person {
      */
     public void setName(String name) {
         this.name = name;
+        deleteQRCode();
     }
     
     /**
