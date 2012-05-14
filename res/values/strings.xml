@@ -3,7 +3,7 @@
     <string name="app_name">Secure Messaging</string>
     <string name="contacts_title">Contacts</string>
     <string name="settings_title">Settings</string>
-    <string name="identity_title">Identity</string>
+    <string name="identity_title">My Identity</string>
     <string name="add_contact">Add</string>
     <string name="verified">verified</string>
     <string name="unverified">unverified</string>
@@ -61,6 +61,7 @@
         <item >Delete</item>
     </string-array>
     <string name="dialog_set_photo_title">Set Photo</string>
+    <string name="dialog_edit_conversation">Edit Conversation</string>
     <string name="create">Create</string>
     <string name="dialog_add_request_id_hint">Enter User\'s ID</string>
     <string name="password_prompt">Password&#8230;</string>
@@ -78,4 +79,8 @@
     <string name="name_label">Change Name:</string>
     <string name="change_password_label">Change Password:</string>
     <string name="reset">Reset</string>
+    <string-array name="dialog_modify_conversation_menu">
+        <item >Add to Contacts</item>
+        <item >Remove from Conversation</item>
+    </string-array>
 </resources>

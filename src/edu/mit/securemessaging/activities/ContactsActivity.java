@@ -60,7 +60,7 @@ public class ContactsActivity extends Activity {
             contactList.setAdapter(
                     new ContactAdapter(this,
                             R.layout.contact,
-                            BACKEND.getPersonDao().queryBuilder().orderBy("name", false).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
+                            BACKEND.getPersonDao().queryBuilder().orderBy("name", true).where().notIn(Person.TRUST_FIELD, TrustLevel.UNKNOWN, TrustLevel.ME).prepare(),
                             BACKEND.getHelper())
                     );
         } catch (SQLException e) {

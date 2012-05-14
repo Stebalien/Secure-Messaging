@@ -8,6 +8,7 @@ import edu.mit.securemessaging.Backend.ConversationListener;
 import edu.mit.securemessaging.Common;
 import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.Message;
+import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.widgets.MessageAdapter;
 import android.app.Activity;
@@ -18,17 +19,31 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+<<<<<<< HEAD
+=======
+import android.widget.AdapterView.OnItemClickListener;
+>>>>>>> Conversation Dialog and Contact sorting
 
 public class ConversationActivity extends Activity {
     private static Backend BACKEND = null;
     private static final int ADD_CONTACT = 1;
     
+    // Use ints for speed as recommended by android. (Really? speed+java?)
+    protected static final int DIALOG_ADD = 1;
+    protected static final int DIALOG_MODIFY = 2;
+    
+    // Modify dialog indices
+    protected static final int DIALOG_MODIFY_ADD = 0;
+    protected static final int DIALOG_MODIFY_REMOVE = 1;
+   
     /** Called when the activity is first created. */
     private ListView listMessages;
     private Conversation conversation;
@@ -77,6 +92,17 @@ public class ConversationActivity extends Activity {
         listMessages.setItemsCanFocus(false);
         int position = adapter.getCount() - 1;
         listMessages.setSelection(position > 0 ? position : 0);
+        
+      listMessages.setOnItemLongClickListener(new OnItemLongClickListener() {
+      public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+          final Bundle args = new Bundle();
+          args.putString("id", ((Message)parent.getItemAtPosition(position)).getID());
+          showDialog(DIALOG_MODIFY,  args);
+          return true;
+      }
+      
+  });
+        
         
         ((TextView)findViewById(R.id.labelHeader)).setText("Placeholder conversation text");
         // Show right button.
@@ -138,9 +164,42 @@ public class ConversationActivity extends Activity {
         }
         
     }
-    
+    protected Dialog onCreateDialog(int id, final Bundle bundle) {
+        final Dialog dialog;
+        final String messageId;
+        switch(id) {
+            case DIALOG_MODIFY:
+            	messageId = bundle.getString("id");
+                    dialog = new AlertDialog.Builder(this)
+                            .setTitle(R.string.dialog_edit_conversation)
+                            .setItems( R.array.dialog_modify_conversation_menu, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int item) {
+                                    switch(item) {
+                                    case DIALOG_MODIFY_ADD:
+                                    	//BACKEND.deleteConversations(conversations);
+                                        break;
+                                    case DIALOG_MODIFY_REMOVE:
+                                        //showDialog(DIALOG_DELETE, bundle);
+                                        break;
+                                }
+                                }
+                            }).create();
+                
+                dialog.setCancelable(true);
+                break;
+            default:
+                dialog = null;
+        }
+        return dialog;
+    }
     @Override
     public void onBackPressed() {
         finish();
+    }
+    
+    public void editContact(String contactID) {
+        Intent intent = new Intent(this, EditContactActivity.class);
+        intent.putExtra("id", contactID);
+        startActivityForResult(intent, 0); // Should be const later TODO
     }
 }
