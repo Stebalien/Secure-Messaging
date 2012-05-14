@@ -7,7 +7,6 @@ import com.google.zxing.integration.android.IntentResult;
 
 import edu.mit.securemessaging.Backend;
 import edu.mit.securemessaging.Backend.ContactsListener;
-import edu.mit.securemessaging.Conversation;
 import edu.mit.securemessaging.Person;
 import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
@@ -23,7 +22,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -228,15 +226,20 @@ public class ContactsActivity extends Activity {
     }
     
     public void onActivityResult(int request, int result, Intent data) {
-        String contents = IntentIntegrator.parseActivityResult(request, result, data).getContents();
-        if (contents != null) {
-            int split = contents.indexOf(':');
-            try {
-                BACKEND.addOrUpdateContact(new Person(contents.substring(0, split), contents.substring(split + 1, contents.length()), TrustLevel.VERIFIED));
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        IntentResult intentResult = IntentIntegrator.parseActivityResult(request, result, data);
+        if (intentResult != null) {
+            String contents = intentResult.getContents();
+            if (contents != null) {
+                int split = contents.indexOf(':');
+                try {
+                    BACKEND.addOrUpdateContact(new Person(contents.substring(0, split), contents.substring(split + 1, contents.length()), TrustLevel.VERIFIED));
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+                return;
             }
-        } else if (request == REQUEST_MODIFY_CONTACT && result == Activity.RESULT_OK) {
+        }
+        if (request == REQUEST_MODIFY_CONTACT && result == Activity.RESULT_OK) {
             BACKEND.fireContactsUpdated();
         }
     }
