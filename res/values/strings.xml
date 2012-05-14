@@ -57,7 +57,7 @@
         <item >Take Picture</item>
         <item >Clear Photo</item>
     </string-array>
-    <string-array name="dialog_modify_conversation_menu">
+    <string-array name="dialog_modify_inbox_menu">
         <item >Delete</item>
     </string-array>
     <string name="dialog_set_photo_title">Set Photo</string>

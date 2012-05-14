@@ -27,10 +27,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-<<<<<<< HEAD
-=======
-import android.widget.AdapterView.OnItemClickListener;
->>>>>>> Conversation Dialog and Contact sorting
 
 public class ConversationActivity extends Activity {
     private static Backend BACKEND = null;
