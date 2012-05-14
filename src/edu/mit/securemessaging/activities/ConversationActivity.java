@@ -16,9 +16,6 @@ import edu.mit.securemessaging.R;
 import edu.mit.securemessaging.TrustLevel;
 import edu.mit.securemessaging.widgets.MessageAdapter;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -30,7 +27,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ConversationActivity extends Activity {
     private static Backend BACKEND = null;

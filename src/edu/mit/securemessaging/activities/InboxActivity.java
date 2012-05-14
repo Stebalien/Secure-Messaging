@@ -15,6 +15,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -124,8 +125,13 @@ public class InboxActivity extends Activity {
                         .setMessage(R.string.dialog_delete_conversation_message)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int item) {
-                                BACKEND.deleteConversations(BACKEND.getConversation(conversationId));
-                                Toast.makeText(getApplicationContext(), "Conversation Deleted", Toast.LENGTH_SHORT).show();
+                                try {
+                                    BACKEND.getConversationDao().deleteById(conversationId);
+                                    BACKEND.fireInboxUpdated();
+                                    Toast.makeText(getApplicationContext(), "Conversation Deleted", Toast.LENGTH_SHORT).show();
+                                } catch (SQLException e) {
+                                    Log.e("INBOX", "Failed to delete conversation", e);
+                                }
                         }})
                         .setNegativeButton(android.R.string.no, null).create();
                 dialog.setCancelable(true);

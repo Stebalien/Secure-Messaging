@@ -20,8 +20,10 @@ public final class Common {
         		return "No Members";
             case 1:
                 return memberList.get(0).getName();
-            default:
+            case 2:
                 return memberList.get(0).getName()+", "+memberList.get(1).getName();
+            default:
+                return memberList.get(0).getName()+", "+memberList.get(1).getName() + ",...";
         }
     }
     public static String formatDate(Date time) {
