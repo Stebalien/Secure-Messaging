@@ -107,7 +107,7 @@ public class InboxActivity extends Activity {
                 conversationId = bundle.getString("id");
                 dialog = new AlertDialog.Builder(this)
                         .setTitle(R.string.dialog_modify_conversation_title)
-                        .setItems( R.array.dialog_modify_conversation_menu, new DialogInterface.OnClickListener() {
+                        .setItems( R.array.dialog_modify_inbox_menu, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int item) {
                                 switch(item) {
                                     case DIALOG_MODIFY_DELETE:

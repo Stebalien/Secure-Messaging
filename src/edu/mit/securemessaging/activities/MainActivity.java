@@ -58,7 +58,7 @@ public class MainActivity extends TabActivity {
             public void run() {
                 backend.catchupMessages();
             }
-        }, 0, 6000);
+        }, 0, 2000);
         
     }
     
